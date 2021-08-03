@@ -1,0 +1,11 @@
+
+- Add the player
+- Make the player movable via controls
+- Add enemies
+- Add a core at the middle
+- Make enemies want to break the now breakable core
+- Add bullets
+- Make the player able to shoot bullets at enemies via controls
+- Add turrets
+- Make turrets shoot bullets at enemies
+- Expand the TODO list

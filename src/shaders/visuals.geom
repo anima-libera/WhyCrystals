@@ -20,7 +20,8 @@ void main()
 	float zoom_factor = 100.0;
 
 	g_texture_pos = texture_rect_topleft_xy +
-		vec2(texture_rect_w * 0.0, texture_rect_h * 0.0) / texture_side;
+		vec2(texture_rect_w * 0.0, texture_rect_h * 0.0);
+	g_texture_pos /= texture_side;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy += vec2(-1, -1) * 0.5;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
@@ -28,7 +29,8 @@ void main()
 	EmitVertex();
 
 	g_texture_pos = texture_rect_topleft_xy +
-		vec2(texture_rect_w * 1.0, texture_rect_h * 0.0) / texture_side;
+		vec2(texture_rect_w * 1.0, texture_rect_h * 0.0);
+	g_texture_pos /= texture_side;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy += vec2(+1, -1) * 0.5;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
@@ -36,7 +38,8 @@ void main()
 	EmitVertex();
 
 	g_texture_pos = texture_rect_topleft_xy +
-		vec2(texture_rect_w * 0.0, texture_rect_h * 1.0) / texture_side;
+		vec2(texture_rect_w * 0.0, texture_rect_h * 1.0);
+	g_texture_pos /= texture_side;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy += vec2(-1, +1) * 0.5;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
@@ -44,7 +47,8 @@ void main()
 	EmitVertex();
 
 	g_texture_pos = texture_rect_topleft_xy +
-		vec2(texture_rect_w * 1.0, texture_rect_h * 1.0) / texture_side;
+		vec2(texture_rect_w * 1.0, texture_rect_h * 1.0);
+	g_texture_pos /= texture_side;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy += vec2(+1, +1) * 0.5;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
