@@ -2,8 +2,12 @@
 #include "window.h"
 #include "shaders.h"
 #include "random.h"
+#include "darray.h"
 #include <stdlib.h>
+#include <math.h>
 #include <assert.h>
+
+#define TAU 6.28318530717
 
 struct texture_rect_t
 {
@@ -23,58 +27,6 @@ struct visual_t
 };
 typedef struct visual_t visual_t;
 
-struct darray_t
-{
-	unsigned int len;
-	unsigned int cap;
-	void* array;
-};
-typedef struct darray_t darray_t;
-
-static unsigned int umax(unsigned int a, unsigned int b)
-{
-	return a > b ? a : b;
-}
-
-#if 0
-void darray_reserve(darray_t* darray, unsigned int elem_size,
-	unsigned int for_how_much)
-{
-	if (for_how_much > darray->cap - darray->len)
-	{
-		/* TODO */
-	}
-}
-#endif
-
-void darray_resize(darray_t* darray, unsigned int elem_size,
-	unsigned int new_len)
-{
-	if (new_len > darray->cap)
-	{
-		unsigned int new_cap =
-			umax(new_len, ((float)darray->cap + 2.3f) * 1.3f);
-		void* new_array = realloc(darray->array, new_cap * elem_size);
-		assert(new_array != NULL);
-		darray->array = new_array;
-		darray->cap = new_cap;
-	}
-	darray->len = new_len;
-}
-
-unsigned int darray_add_len(darray_t* darray, unsigned int elem_size,
-	int len_inc)
-{
-	unsigned int old_len = darray->len;
-	darray_resize(darray, elem_size, darray->len + len_inc);
-	return old_len;
-}
-
-unsigned int darray_add_one(darray_t* darray, unsigned int elem_size)
-{
-	return darray_add_len(darray, elem_size, 1);
-}
-
 struct tile_type_t
 {
 	texture_rect_t texture_rect;
@@ -88,10 +40,52 @@ struct tile_t
 };
 typedef struct tile_t tile_t;
 
+#define ENABLE_DEV_OBJECTS
+#undef ENABLE_DEV_OBJECTS
+
+enum object_type_t
+{
+#ifdef ENABLE_DEV_OBJECTS
+	OT_DEV,
+#endif
+	OT_PLAYER,
+	OT_ANIMAL,
+};
+typedef enum object_type_t object_type_t;
+
+#ifdef ENABLE_DEV_OBJECTS
+struct object_dev_t
+{
+	float x, y, z;
+	unsigned int visual_index;
+};
+typedef struct object_dev_t object_dev_t;
+#endif
+
+struct object_player_t
+{
+	float x, y, z;
+	unsigned int visual_index;
+};
+typedef struct object_player_t object_player_t;
+
+struct object_animal_t
+{
+	float x, y, z;
+	unsigned int visual_index;
+	
+	float target_x, target_y;
+};
+typedef struct object_animal_t object_animal_t;
+
 struct object_t
 {
-	unsigned int visual_index;
-	float x, y, z;
+	object_type_t type;
+	union
+	{
+		object_player_t player;
+		object_animal_t animal;
+	};
 };
 typedef struct object_t object_t;
 
@@ -126,16 +120,17 @@ struct world_t
 };
 typedef struct world_t world_t;
 
-void world_generate(world_t* world)
+void world_init(world_t* world)
 {
 	world->tile_type_darray = (darray_t){0};
 	world->chunk_side = 9;
 	world->chunk_offset_x = -4;
 	world->chunk_offset_y = -4;
-	world->player_object_index = (object_index_t){0};
 	world->chunk_darray = (darray_t){0};
-	world->visual_modified = 0;
+	world->player_object_index = (object_index_t){0};
 	world->visual_darray = (darray_t){0};
+	world->visual_modified = 0;
+	world->buf_id_visuals = 0;
 }
 
 void world_cleanup(world_t* world)
@@ -213,18 +208,22 @@ void generate_player(world_t* world)
 	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
 	unsigned int i = darray_add_one(&chunk->object_darray, sizeof(object_t));
 	object_t* object = &((object_t*)chunk->object_darray.array)[i];
-	object->x = 0.0f;
-	object->y = 0.0f;
-	object->z = 0.0f;
+
+	object->type = OT_PLAYER;
+	object_player_t* player = &object->player;
+
+	player->x = 0.0f;
+	player->y = 0.0f;
+	player->z = 0.0f;
 
 	world->player_object_index.chunk_index = chunk_index;
 	world->player_object_index.inchunk_object_index = i;
 
 	unsigned int j = darray_add_one(&world->visual_darray, sizeof(visual_t));
 	visual_t* visual = &((visual_t*)world->visual_darray.array)[j];
-	visual->x = (float)object->x;
-	visual->y = (float)object->y;
-	visual->z = (float)object->z;
+	visual->x = (float)player->x;
+	visual->y = (float)player->y;
+	visual->z = (float)player->z;
 	visual->w = 0.15f;
 	visual->h = 0.45f;
 	visual->texture_rect.x = 0;
@@ -236,7 +235,52 @@ void generate_player(world_t* world)
 	visual->flags = 0;
 	visual->flags |= VISUAL_VERTICAL;
 
-	object->visual_index = j;
+	player->visual_index = j;
+
+	world->visual_modified = 1;
+}
+
+void generate_animal(world_t* world, float x, float y)
+{
+	unsigned int chunk_index = 0;
+	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	unsigned int i = darray_add_one(&chunk->object_darray, sizeof(object_t));
+	object_t* object = &((object_t*)chunk->object_darray.array)[i];
+
+	object->type = OT_ANIMAL;
+	object_animal_t* animal = &object->animal;
+
+	animal->x = x;
+	animal->y = y;
+	animal->z = 0.0f;
+
+	unsigned int j = darray_add_one(&world->visual_darray, sizeof(visual_t));
+	visual_t* visual = &((visual_t*)world->visual_darray.array)[j];
+	visual->x = (float)animal->x;
+	visual->y = (float)animal->y;
+	visual->z = (float)animal->z;
+	visual->w = 0.4f;
+	visual->h = 0.4f;
+	visual->texture_rect.x = 1;
+	visual->texture_rect.y = 8;
+	visual->texture_rect.w = 3;
+	visual->texture_rect.h = 3;
+	visual->texture_rect.origin_x = 0.5f;
+	visual->texture_rect.origin_y = 0.0f;
+	visual->flags = 0;
+	visual->flags |= VISUAL_VERTICAL;
+
+	animal->visual_index = j;
+
+	world->visual_modified = 1;
+}
+
+void move_visual(world_t* world, unsigned int visual_index, float x, float y)
+{
+	visual_t* visual = &((visual_t*)world->visual_darray.array)[visual_index];
+
+	visual->x = x;
+	visual->y = y;
 
 	world->visual_modified = 1;
 }
@@ -248,15 +292,67 @@ void move_player(world_t* world, float diff_x, float diff_y)
 	unsigned int object_index = world->player_object_index.inchunk_object_index;
 	object_t* object = &((object_t*)chunk->object_darray.array)[object_index];
 
-	object->x += diff_x;
-	object->y += diff_y;
+	assert(object->type == OT_PLAYER);
+	object_player_t* player = &object->player;
 
-	visual_t* visual = &((visual_t*)world->visual_darray.array)[object->visual_index];
+	player->x += diff_x;
+	player->y += diff_y;
+	move_visual(world, player->visual_index, player->x, player->y);
+}
 
-	visual->x = object->x;
-	visual->y = object->y;
+void chunk_iter(world_t* world, unsigned int chunk_index)
+{
+	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	for (unsigned int i = 0; i < chunk->object_darray.len; i++)
+	{
+		object_t* object = &((object_t*)chunk->object_darray.array)[i];
+		if (object->type == OT_ANIMAL)
+		{
+			object_animal_t* animal = &object->animal;
 
-	world->visual_modified = 1;
+			float move_x = animal->target_x - animal->x;
+			float move_y = animal->target_y - animal->y;
+
+			float move_speed = 0.02f;
+			float move_dist = sqrtf(move_x*move_x + move_y*move_y);
+
+			if (move_dist < move_speed)
+			{
+				animal->x = animal->target_x;
+				animal->y = animal->target_y;
+				move_visual(world, animal->visual_index, animal->x, animal->y);
+
+				if (rg_int(g_rg, 0, 500) == 0)
+				{
+					float angle = rg_float(g_rg, 0.0f, TAU);
+					float dist = rg_float(g_rg, 0.4f, 3.0f);
+
+					animal->target_x = animal->x + cosf(angle) * dist;
+					animal->target_y = animal->y + sinf(angle) * dist;
+				}
+			}
+			else
+			{
+				float norm_move_x = move_x / move_dist;
+				float norm_move_y = move_y / move_dist;
+
+				float speed_x = norm_move_x * move_speed;
+				float speed_y = norm_move_y * move_speed;
+
+				animal->x += speed_x;
+				animal->y += speed_y;
+				move_visual(world, animal->visual_index, animal->x, animal->y);
+			}
+		}
+	}
+}
+
+void world_iter(world_t* world)
+{
+	for (unsigned int i = 0; i < world->chunk_darray.len; i++)
+	{
+		chunk_iter(world, i);
+	}
 }
 
 unsigned char* g_texture_map_data = NULL;
@@ -320,6 +416,25 @@ void generate_g_texture_map(void)
 		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 3] = a;
 	}
 
+	rect_x = 1;
+	rect_y = 8;
+	rect_w = 3;
+	rect_h = 3;
+	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
+	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
+	{
+		int ix = x - rect_x, iy = y - rect_y;
+		int c = !(ix == 1 && iy >= 1);
+		unsigned char r = 255;
+		unsigned char g = 100;
+		unsigned char b = 0;
+		unsigned char a = 255 * c;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 0] = r;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 1] = g;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 2] = b;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 3] = a;
+	}
+
 	glGenTextures(1, &g_texture_map_id);
 	glBindTexture(GL_TEXTURE_2D, g_texture_map_id);
 	glTexImage2D(GL_TEXTURE_2D,
@@ -356,9 +471,14 @@ int main(void)
 	generate_g_texture_map();
 
 	world_t* world = malloc(sizeof(world_t));
-	world_generate(world);
+	world_init(world);
 	generate_world_map(world);
 	generate_player(world);
+
+	generate_animal(world, 1.0f, 0.0f);
+	generate_animal(world, 1.0f, 1.0f);
+	generate_animal(world, 1.0f, 2.0f);
+	generate_animal(world, 1.0f, 3.0f);
 
 	glGenBuffers(1, &world->buf_id_visuals);
 
@@ -395,6 +515,8 @@ int main(void)
 				break;
 			}
 		}
+
+		world_iter(world);
 
 		if (world->visual_modified)
 		{

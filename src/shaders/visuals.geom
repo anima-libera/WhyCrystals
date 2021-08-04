@@ -9,8 +9,6 @@ in vec2 v_texture_rect_origin[];
 in uint v_flags[];
 out vec2 g_texture_pos;
 
-#define TAU 6.28318530717
-
 #define VISUAL_VERTICAL 0x1
 
 void main()
@@ -27,8 +25,8 @@ void main()
 
 	float left_offset = -texture_rect_origin_xy.x * w;
 	float right_offset = (1.0 - texture_rect_origin_xy.x) * w;
-	float top_offset = -texture_rect_origin_xy.y * h;
-	float bottom_offset = (1.0 - texture_rect_origin_xy.y) * h;
+	float top_offset = (1.0 - texture_rect_origin_xy.y) * h;
+	float bottom_offset = -texture_rect_origin_xy.y * h;
 
 	bool vertical = (v_flags[0] & VISUAL_VERTICAL) != 0;
 
@@ -42,6 +40,10 @@ void main()
 	gl_Position.x += left_offset;
 	gl_Position.y += top_offset;
 	gl_Position.z = gl_Position.y * depth_factor;
+	if (vertical)
+	{
+		gl_Position.z -= h * depth_factor * 1.5;
+	}
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
@@ -53,6 +55,10 @@ void main()
 	gl_Position.x += right_offset;
 	gl_Position.y += top_offset;
 	gl_Position.z = gl_Position.y * depth_factor;
+	if (vertical)
+	{
+		gl_Position.z -= h * depth_factor * 1.5;
+	}
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
@@ -66,10 +72,6 @@ void main()
 	gl_Position.z = gl_Position.y * depth_factor;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
-	if (!vertical)
-	{
-		gl_Position.z += texture_rect_h * depth_factor;
-	}
 	EmitVertex();
 
 	g_texture_pos = texture_rect_topleft_xy;
@@ -81,10 +83,6 @@ void main()
 	gl_Position.z = gl_Position.y * depth_factor;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
-	if (!vertical)
-	{
-		gl_Position.z += texture_rect_h * depth_factor;
-	}
 	EmitVertex();
 
 	EndPrimitive();

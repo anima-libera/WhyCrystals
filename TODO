@@ -1,11 +1,11 @@
 
-- Add enemies
 - Add a core at the middle
 - Make enemies want to break the now breakable core
 - Add bullets
 - Make the player able to shoot bullets at enemies via controls
 - Add turrets
 - Make turrets shoot bullets at enemies
+- Make the player movable by targetting destination via the mouse
 - Make the visual dynamic array chunk based, or not, think about it
 - Make multiple chunks (do NOT try to optimize anything yet)
 - Expand the TODO list
