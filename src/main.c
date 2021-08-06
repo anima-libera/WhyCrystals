@@ -16,7 +16,8 @@ struct texture_rect_t
 };
 typedef struct texture_rect_t texture_rect_t;
 
-#define VISUAL_VERTICAL 0x1
+#define VISUAL_USED 0x1
+#define VISUAL_VERTICAL 0x2
 
 struct visual_t
 {
@@ -35,7 +36,7 @@ typedef struct tile_type_t tile_type_t;
 
 struct tile_t
 {
-	unsigned int visual_index;
+	unsigned int vi;
 	unsigned int type_index;
 };
 typedef struct tile_t tile_t;
@@ -50,6 +51,7 @@ enum object_type_t
 #endif
 	OT_PLAYER,
 	OT_ANIMAL,
+	OT_SHOT,
 };
 typedef enum object_type_t object_type_t;
 
@@ -57,7 +59,7 @@ typedef enum object_type_t object_type_t;
 struct object_dev_t
 {
 	float x, y, z;
-	unsigned int visual_index;
+	unsigned int vi;
 };
 typedef struct object_dev_t object_dev_t;
 #endif
@@ -65,18 +67,27 @@ typedef struct object_dev_t object_dev_t;
 struct object_player_t
 {
 	float x, y, z;
-	unsigned int visual_index;
+	unsigned int body_vi;
 };
 typedef struct object_player_t object_player_t;
 
 struct object_animal_t
 {
 	float x, y, z;
-	unsigned int visual_index;
+	unsigned int body_vi;
 	
 	float target_x, target_y;
 };
 typedef struct object_animal_t object_animal_t;
+
+struct object_shot_t
+{
+	float x, y, z;
+	unsigned int body_vi;
+	
+	float speed_x, speed_y, speed_z;
+};
+typedef struct object_shot_t object_shot_t;
 
 struct object_t
 {
@@ -85,6 +96,7 @@ struct object_t
 	{
 		object_player_t player;
 		object_animal_t animal;
+		object_shot_t shot;
 	};
 };
 typedef struct object_t object_t;
@@ -172,9 +184,9 @@ void generate_tile(world_t* world, unsigned int chunk_index, int x, int y)
 	visual->texture_rect.h = 8;
 	visual->texture_rect.origin_x = 0.5f;
 	visual->texture_rect.origin_y = 0.5f;
-	visual->flags = 0;
+	visual->flags = VISUAL_USED;
 
-	tile->visual_index = i;
+	tile->vi = i;
 
 	world->visual_modified = 1;
 }
@@ -232,10 +244,9 @@ void generate_player(world_t* world)
 	visual->texture_rect.h = 3;
 	visual->texture_rect.origin_x = 0.5f;
 	visual->texture_rect.origin_y = 0.0f;
-	visual->flags = 0;
-	visual->flags |= VISUAL_VERTICAL;
+	visual->flags = VISUAL_USED | VISUAL_VERTICAL;
 
-	player->visual_index = j;
+	player->body_vi = j;
 
 	world->visual_modified = 1;
 }
@@ -253,6 +264,8 @@ void generate_animal(world_t* world, float x, float y)
 	animal->x = x;
 	animal->y = y;
 	animal->z = 0.0f;
+	animal->target_x = animal->x;
+	animal->target_y = animal->y;
 
 	unsigned int j = darray_add_one(&world->visual_darray, sizeof(visual_t));
 	visual_t* visual = &((visual_t*)world->visual_darray.array)[j];
@@ -267,25 +280,51 @@ void generate_animal(world_t* world, float x, float y)
 	visual->texture_rect.h = 3;
 	visual->texture_rect.origin_x = 0.5f;
 	visual->texture_rect.origin_y = 0.0f;
-	visual->flags = 0;
-	visual->flags |= VISUAL_VERTICAL;
+	visual->flags = VISUAL_USED | VISUAL_VERTICAL;
 
-	animal->visual_index = j;
+	animal->body_vi = j;
 
 	world->visual_modified = 1;
 }
 
-void move_visual(world_t* world, unsigned int visual_index, float x, float y)
+void generate_shot(world_t* world, float x, float y)
 {
-	visual_t* visual = &((visual_t*)world->visual_darray.array)[visual_index];
+	unsigned int chunk_index = 0;
+	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	unsigned int i = darray_add_one(&chunk->object_darray, sizeof(object_t));
+	object_t* object = &((object_t*)chunk->object_darray.array)[i];
 
-	visual->x = x;
-	visual->y = y;
+	object->type = OT_SHOT;
+	object_shot_t* shot = &object->shot;
+
+	shot->x = x;
+	shot->y = y;
+	shot->z = 0.3f;
+	shot->speed_x = 0.6f;
+	shot->speed_y = 0.0f;
+	shot->speed_z = 0.0f;
+
+	unsigned int j = darray_add_one(&world->visual_darray, sizeof(visual_t));
+	visual_t* visual = &((visual_t*)world->visual_darray.array)[j];
+	visual->x = (float)shot->x;
+	visual->y = (float)shot->y;
+	visual->z = (float)shot->z;
+	visual->w = 0.1f;
+	visual->h = 0.1f;
+	visual->texture_rect.x = 4;
+	visual->texture_rect.y = 8;
+	visual->texture_rect.w = 1;
+	visual->texture_rect.h = 1;
+	visual->texture_rect.origin_x = 0.5f;
+	visual->texture_rect.origin_y = 0.5f;
+	visual->flags = VISUAL_USED | VISUAL_VERTICAL;
+
+	shot->body_vi = j;
 
 	world->visual_modified = 1;
 }
 
-void move_player(world_t* world, float diff_x, float diff_y)
+object_player_t* get_player(world_t* world)
 {
 	unsigned int chunk_index = world->player_object_index.chunk_index;
 	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
@@ -295,9 +334,39 @@ void move_player(world_t* world, float diff_x, float diff_y)
 	assert(object->type == OT_PLAYER);
 	object_player_t* player = &object->player;
 
+	return player;
+}
+
+void generate_player_shot(world_t* world)
+{
+	object_player_t* player = get_player(world);
+
+	generate_shot(world, player->x, player->y);
+}
+
+visual_t* get_visual(world_t* world, unsigned int vi)
+{
+	return &((visual_t*)world->visual_darray.array)[vi];
+}
+
+void move_visual(world_t* world, unsigned int vi, float x, float y, float z)
+{
+	visual_t* visual = get_visual(world, vi);
+
+	visual->x = x;
+	visual->y = y;
+	visual->z = z;
+
+	world->visual_modified = 1;
+}
+
+void move_player(world_t* world, float diff_x, float diff_y)
+{
+	object_player_t* player = get_player(world);
+
 	player->x += diff_x;
 	player->y += diff_y;
-	move_visual(world, player->visual_index, player->x, player->y);
+	move_visual(world, player->body_vi, player->x, player->y, 0.0f);
 }
 
 void chunk_iter(world_t* world, unsigned int chunk_index)
@@ -320,7 +389,7 @@ void chunk_iter(world_t* world, unsigned int chunk_index)
 			{
 				animal->x = animal->target_x;
 				animal->y = animal->target_y;
-				move_visual(world, animal->visual_index, animal->x, animal->y);
+				move_visual(world, animal->body_vi, animal->x, animal->y, 0.0f);
 
 				if (rg_int(g_rg, 0, 500) == 0)
 				{
@@ -341,7 +410,32 @@ void chunk_iter(world_t* world, unsigned int chunk_index)
 
 				animal->x += speed_x;
 				animal->y += speed_y;
-				move_visual(world, animal->visual_index, animal->x, animal->y);
+				move_visual(world, animal->body_vi, animal->x, animal->y, 0.0f);
+			}
+		}
+		else if (object->type == OT_SHOT)
+		{
+			object_shot_t* shot = &object->shot;
+
+			shot->x += shot->speed_x;
+			shot->y += shot->speed_y;
+			shot->z += shot->speed_z;
+			move_visual(world, shot->body_vi, shot->x, shot->y, shot->z);
+
+			shot->speed_z -= 0.01f;
+
+			shot->speed_x *= 0.98f;
+			shot->speed_y *= 0.98f;
+			shot->speed_z *= 0.98f;
+
+			if (shot->z <= 0.0f)
+			{
+				visual_t* visual = get_visual(world, shot->body_vi);
+				if (visual->flags & VISUAL_USED)
+				{
+					visual->flags -= VISUAL_USED;
+				}
+				world->visual_modified = 1;
 			}
 		}
 	}
@@ -435,6 +529,23 @@ void generate_g_texture_map(void)
 		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 3] = a;
 	}
 
+	rect_x = 4;
+	rect_y = 8;
+	rect_w = 1;
+	rect_h = 1;
+	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
+	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
+	{
+		unsigned char r = 255;
+		unsigned char g = 255;
+		unsigned char b = 40;
+		unsigned char a = 255;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 0] = r;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 1] = g;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 2] = b;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 3] = a;
+	}
+
 	glGenTextures(1, &g_texture_map_id);
 	glBindTexture(GL_TEXTURE_2D, g_texture_map_id);
 	glTexImage2D(GL_TEXTURE_2D,
@@ -510,6 +621,9 @@ int main(void)
 						break;
 						case SDLK_LEFT:
 							move_player(world, -0.05f, 0.0f);
+						break;
+						case SDLK_s:
+							generate_player_shot(world);
 						break;
 					}
 				break;
