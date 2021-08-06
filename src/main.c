@@ -52,6 +52,7 @@ enum object_type_t
 	OT_PLAYER,
 	OT_ANIMAL,
 	OT_SHOT,
+	OT_PLANT,
 };
 typedef enum object_type_t object_type_t;
 
@@ -89,6 +90,13 @@ struct object_shot_t
 };
 typedef struct object_shot_t object_shot_t;
 
+struct object_plant_t
+{
+	float x, y, z;
+	unsigned int body_vi;
+};
+typedef struct object_plant_t object_plant_t;
+
 struct object_t
 {
 	object_type_t type;
@@ -97,6 +105,7 @@ struct object_t
 		object_player_t player;
 		object_animal_t animal;
 		object_shot_t shot;
+		object_plant_t plant;
 	};
 };
 typedef struct object_t object_t;
@@ -324,6 +333,40 @@ void generate_shot(world_t* world, float x, float y)
 	world->visual_modified = 1;
 }
 
+void generate_plant(world_t* world, float x, float y)
+{
+	unsigned int chunk_index = 0;
+	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	unsigned int i = darray_add_one(&chunk->object_darray, sizeof(object_t));
+	object_t* object = &((object_t*)chunk->object_darray.array)[i];
+
+	object->type = OT_PLANT;
+	object_plant_t* plant = &object->plant;
+
+	plant->x = x;
+	plant->y = y;
+	plant->z = 0.0f;
+
+	unsigned int j = darray_add_one(&world->visual_darray, sizeof(visual_t));
+	visual_t* visual = &((visual_t*)world->visual_darray.array)[j];
+	visual->x = (float)plant->x;
+	visual->y = (float)plant->y;
+	visual->z = (float)plant->z;
+	visual->w = 0.3f * 0.8f;
+	visual->h = 0.7f * 0.8f;
+	visual->texture_rect.x = 10;
+	visual->texture_rect.y = 8;
+	visual->texture_rect.w = 3;
+	visual->texture_rect.h = 7;
+	visual->texture_rect.origin_x = 0.5f;
+	visual->texture_rect.origin_y = 0.0f;
+	visual->flags = VISUAL_USED | VISUAL_VERTICAL;
+
+	plant->body_vi = j;
+
+	world->visual_modified = 1;
+}
+
 object_player_t* get_player(world_t* world)
 {
 	unsigned int chunk_index = world->player_object_index.chunk_index;
@@ -458,11 +501,14 @@ void generate_g_texture_map(void)
 	g_texture_map_data = calloc(TEXTURE_MAP_SIDE * TEXTURE_MAP_SIDE * 4, 1);
 
 	unsigned int rect_x, rect_y, rect_w, rect_h;
+	float rect_origin_x, rect_origin_y;
 
 	rect_x = 0;
 	rect_y = 0;
 	rect_w = 8;
 	rect_h = 8;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.5f;
 	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
 	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
 	{
@@ -480,6 +526,8 @@ void generate_g_texture_map(void)
 	rect_y = 0;
 	rect_w = 8;
 	rect_h = 8;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.5f;
 	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
 	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
 	{
@@ -497,6 +545,8 @@ void generate_g_texture_map(void)
 	rect_y = 8;
 	rect_w = 1;
 	rect_h = 3;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.0f;
 	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
 	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
 	{
@@ -514,6 +564,8 @@ void generate_g_texture_map(void)
 	rect_y = 8;
 	rect_w = 3;
 	rect_h = 3;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.0f;
 	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
 	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
 	{
@@ -533,6 +585,8 @@ void generate_g_texture_map(void)
 	rect_y = 8;
 	rect_w = 1;
 	rect_h = 1;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.5f;
 	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
 	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
 	{
@@ -540,6 +594,47 @@ void generate_g_texture_map(void)
 		unsigned char g = 255;
 		unsigned char b = 40;
 		unsigned char a = 255;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 0] = r;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 1] = g;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 2] = b;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 3] = a;
+	}
+
+	rect_x = 5;
+	rect_y = 8;
+	rect_w = 5;
+	rect_h = 3;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.5f;
+	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
+	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
+	{
+		int ix = x - rect_x, iy = y - rect_y;
+		int c = !((ix == 0 || ix == 4) && (iy == 0 || iy == 2));
+		unsigned char r = 255;
+		unsigned char g = 100;
+		unsigned char b = 0;
+		unsigned char a = 255 * c;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 0] = r;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 1] = g;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 2] = b;
+		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 3] = a;
+	}
+
+	rect_x = 10;
+	rect_y = 8;
+	rect_w = 3;
+	rect_h = 7;
+	rect_origin_x = 0.5f;
+	rect_origin_y = 0.0f;
+	for (unsigned int x = rect_x; x < rect_x + rect_w; x++)
+	for (unsigned int y = rect_y; y < rect_y + rect_h; y++)
+	{
+		int ix = x - rect_x, iy = y - rect_y;
+		unsigned char r = 200 * (iy > 2);
+		unsigned char g = 100 * (iy > 2) + 130 * (iy <= 2);
+		unsigned char b = 0;
+		unsigned char a = 255 * (iy <= 2 || ix == 1);
 		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 0] = r;
 		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 1] = g;
 		g_texture_map_data[(x + y * TEXTURE_MAP_SIDE) * 4 + 2] = b;
@@ -586,10 +681,17 @@ int main(void)
 	generate_world_map(world);
 	generate_player(world);
 
-	generate_animal(world, 1.0f, 0.0f);
-	generate_animal(world, 1.0f, 1.0f);
-	generate_animal(world, 1.0f, 2.0f);
-	generate_animal(world, 1.0f, 3.0f);
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		generate_animal(world,
+			rg_float(g_rg, -4.5f, 4.5f), rg_float(g_rg, -4.5f, 4.5f));
+	}
+
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		generate_plant(world,
+			rg_float(g_rg, -4.5f, 4.5f), rg_float(g_rg, -4.5f, 4.5f));
+	}
 
 	glGenBuffers(1, &world->buf_id_visuals);
 
