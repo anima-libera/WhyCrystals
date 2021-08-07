@@ -12,6 +12,10 @@
 - Animate the player and animals walking (on 2 small shitty sprites)
 - Make multiple chunks (do NOT try to optimize anything yet)
 - Add a texture management system
+- Make it easy to add new types of objects
 - Add particles
 - Make the animals not spawn/walk in water or outside of the map
+- Lower the level of water
+- Draw a dirt wall to fill the space between a water tile and the tile y+1
+- Add sounds
 - Expand the TODO list

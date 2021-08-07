@@ -2,8 +2,8 @@
 /* Make easier debuging output related to OpenGL and SDL2.
  * Implementations are in "dbgmsg.c". */
 
-#ifndef CTC_HEADER_DBGMSG__
-#define CTC_HEADER_DBGMSG__
+#ifndef WHYCRYSTALS_HEADER_DBGMSG__
+#define WHYCRYSTALS_HEADER_DBGMSG__
 
 /* Enables the OpenGL debug message through callback calls feature.
  * OpenGL 4.3 or above is requiered for this function to work. */
@@ -17,4 +17,4 @@ void disable_opengl_dbgmsg(void);
  * or the operation involving the SDL2 that failed. */
 void error_sdl2_fail(const char* operation);
 
-#endif /* CTC_HEADER_DBGMSG__ */
+#endif /* WHYCRYSTALS_HEADER_DBGMSG__ */

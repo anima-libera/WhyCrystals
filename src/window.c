@@ -22,7 +22,7 @@ int init_g_graphics(void)
 	}
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-	g_window = SDL_CreateWindow("Capture The Crystals",
+	g_window = SDL_CreateWindow("Why Crystals",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 800,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (g_window == NULL)

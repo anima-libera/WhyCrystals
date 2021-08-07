@@ -1,6 +1,6 @@
 
-#ifndef CTC_HEADER_RANDOM__
-#define CTC_HEADER_RANDOM__
+#ifndef WHYCRYSTALS_HEADER_RANDOM__
+#define WHYCRYSTALS_HEADER_RANDOM__
 
 #include <stdint.h> /* uint32_t */
 
@@ -65,4 +65,4 @@ float rg_float(rg_t* rg, float inf, float sup);
 /* Performs a rg step and returns a random seed object. */
 rg_seed_t rg_rg_seed(rg_t* rg);
 
-#endif /* CTC_HEADER_RANDOM__ */
+#endif /* WHYCRYSTALS_HEADER_RANDOM__ */

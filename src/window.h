@@ -2,8 +2,8 @@
 /* Related to the SDL2 window and the OpenGL context.
  * Implementations are in "window.c". */
 
-#ifndef CTC_HEADER_WINDOW__
-#define CTC_HEADER_WINDOW__
+#ifndef WHYCRYSTALS_HEADER_WINDOW__
+#define WHYCRYSTALS_HEADER_WINDOW__
 
 #include <SDL2/SDL.h>
 
@@ -24,4 +24,4 @@ int init_g_graphics(void);
  * by init_g_graphics. */
 void cleanup_g_graphics(void);
 
-#endif /* CTC_HEADER_WINDOW__ */
+#endif /* WHYCRYSTALS_HEADER_WINDOW__ */

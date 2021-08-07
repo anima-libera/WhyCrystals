@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Compiles the CTC source code.
+""" Compiles the WhyCrystals source code.
 
 Usage:
   {this_script} [options]
@@ -49,7 +49,7 @@ option_debug = cmdline_has_option("-d", "--debug")
 release_build = not option_debug
 src_dir_name = "src"
 bin_dir_name = "bin"
-bin_name = "ctc"
+bin_name = "WhyCrystals"
 
 # Help message if -h
 if option_help:

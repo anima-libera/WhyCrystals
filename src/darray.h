@@ -1,6 +1,6 @@
 
-#ifndef CTC_HEADER_DARRAY__
-#define CTC_HEADER_DARRAY__
+#ifndef WHYCRYSTALS_HEADER_DARRAY__
+#define WHYCRYSTALS_HEADER_DARRAY__
 
 struct darray_t
 {
@@ -18,4 +18,4 @@ unsigned int darray_add_len(darray_t* darray, unsigned int elem_size,
 
 unsigned int darray_add_one(darray_t* darray, unsigned int elem_size);
 
-#endif /* CTC_HEADER_DARRAY__ */
+#endif /* WHYCRYSTALS_HEADER_DARRAY__ */

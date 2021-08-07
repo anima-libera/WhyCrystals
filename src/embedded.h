@@ -3,8 +3,8 @@
  * such as shader source code.
  * See the compilation script "_comp.py" or the EMBEDDED macro for more. */
 
-#ifndef CTC_HEADER_EMBEDDED__
-#define CTC_HEADER_EMBEDDED__
+#ifndef WHYCRYSTALS_HEADER_EMBEDDED__
+#define WHYCRYSTALS_HEADER_EMBEDDED__
 
 /* If this macro is used as would be the extern keyword in a variable
  * declaration, and if filename_ is a string literal, then the compilation
@@ -24,4 +24,4 @@ EMBEDDED("shaders/visuals.vert", TEXT) const char g_shader_visuals_vert[];
 EMBEDDED("shaders/visuals.geom", TEXT) const char g_shader_visuals_geom[];
 EMBEDDED("shaders/visuals.frag", TEXT) const char g_shader_visuals_frag[];
 
-#endif /* CTC_HEADER_EMBEDDED__ */
+#endif /* WHYCRYSTALS_HEADER_EMBEDDED__ */
