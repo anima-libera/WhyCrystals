@@ -7,13 +7,13 @@
 SDL_Window* g_window = NULL;
 
 /* The unique global SDL2-window-compatible OpenGL context.
- * It is created by init_g_graphics and destroyed by cleanup_g_graphics. */
+ * It is created by init_graphics and destroyed by cleanup_g_graphics. */
 static SDL_GLContext s_opengl_context = NULL;
 
-/* The OpenGL VAO generated and bound by init_g_graphics a */
+/* The OpenGL VAO generated and bound by init_graphics a */
 static GLuint s_vao_id = 0;
 
-int init_g_graphics(void)
+int init_graphics(void)
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
@@ -72,7 +72,7 @@ int init_g_graphics(void)
 	return 0;
 }
 
-void cleanup_g_graphics(void)
+void cleanup_graphics(void)
 {
 	glDeleteVertexArrays(1, &s_vao_id);
 	s_vao_id = 0;

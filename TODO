@@ -1,4 +1,7 @@
 
+- Organize world.c better
+- Make sure darrays are not moved while ptrs to cells are still used (dbg mode)
+- Fill the abreviation table
 - Make the animals be killed by shots
 - Add turrets
 - Make turrets shoot at animals
@@ -18,4 +21,7 @@
 - Lower the level of water
 - Draw a dirt wall to fill the space between a water tile and the tile y+1
 - Add sounds
+- Add wrappers around the allocator functions to catch errors and leaks
+- Fix all the leaks
+- Use glBufferSubData instead of glBufferData when possible
 - Expand the TODO list

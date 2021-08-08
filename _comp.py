@@ -154,10 +154,10 @@ build_exit_status = os.system(build_command)
 # Launch if -l
 if option_launch and build_exit_status == 0:
 	launch_command_args = ["./" + bin_name]
-	for launch_arg in launch_args:
-		launch_command_args.append(launch_arg)
 	if option_debug:
 		launch_command_args.append("-d")
+	for launch_arg in launch_args:
+		launch_command_args.append(launch_arg)
 	launch_command = " ".join(launch_command_args)
 	os.chdir(bin_dir_name)
 	print_blue(launch_command)

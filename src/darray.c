@@ -3,17 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#if 0
-void darray_reserve(darray_t* darray, unsigned int elem_size,
-	unsigned int for_how_much)
-{
-	if (for_how_much > darray->cap - darray->len)
-	{
-		/* TODO */
-	}
-}
-#endif
-
 static inline unsigned int umax(unsigned int a, unsigned int b)
 {
 	return a > b ? a : b;
@@ -22,6 +11,9 @@ static inline unsigned int umax(unsigned int a, unsigned int b)
 void darray_resize(darray_t* darray, unsigned int elem_size,
 	unsigned int new_len)
 {
+	#ifdef DEBUG
+		assert(darray->taken_ptr_count == 0);
+	#endif
 	if (new_len > darray->cap)
 	{
 		unsigned int new_cap =
@@ -46,3 +38,22 @@ unsigned int darray_add_one(darray_t* darray, unsigned int elem_size)
 {
 	return darray_add_len(darray, elem_size, 1);
 }
+
+#ifdef DEBUG
+
+void* darray_take_ptr(darray_t* darray, unsigned int elem_size,
+	unsigned int index)
+{
+	darray->taken_ptr_count++;
+	return (char*)darray->array + index * elem_size;
+}
+
+void darray_return_ptr(darray_t* darray, unsigned int elem_size, void* ptr)
+{
+	assert((char*)darray->array <= (char*)ptr);
+	assert((char*)ptr + elem_size <= (char*)darray->array + darray->len);
+	assert(darray->taken_ptr_count >= 1);
+	darray->taken_ptr_count--;
+}
+
+#endif /* DEBUG */
