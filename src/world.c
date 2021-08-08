@@ -418,6 +418,11 @@ void shot_iter(world_t* world, unsigned int chunk_index,
 				object->type = OT_UNUSED;
 
 				unuse_visual(world, animal->body_vi);
+
+				object = object_containing(shot);
+				object->type = OT_UNUSED;
+
+				unuse_visual(world, shot->body_vi);
 			}
 		}
 	}

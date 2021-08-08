@@ -1,8 +1,7 @@
 
-- Organize world.c better
 - Make sure darrays are not moved while ptrs to cells are still used (dbg mode)
+- Organize world.c better
 - Fill the abreviation table
-- Make the animals be killed by shots
 - Add turrets
 - Make turrets shoot at animals
 - Add a core at the middle
