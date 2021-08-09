@@ -2,7 +2,7 @@
 #include "window.h"
 #include "shaders.h"
 #include "random.h"
-#include "darray.h"
+#include "da.h"
 #include "world.h"
 #include "visuals.h"
 #include <SDL2/SDL.h>
@@ -123,8 +123,8 @@ int main(int argc, char** argv)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, world->buf_id_visuals);
 			glBufferData(GL_ARRAY_BUFFER,
-				world->visual_darray.len * sizeof(visual_t),
-				world->visual_darray.array, GL_DYNAMIC_DRAW);
+				world->visual_da.len * sizeof(visual_t),
+				world->visual_da.arr, GL_DYNAMIC_DRAW);
 
 			world->visual_modified = 0;
 		}
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 			sizeof(visual_t),
 			(void*)offsetof(visual_t, flags));
 
-		glDrawArrays(GL_POINTS, 0, world->visual_darray.len);
+		glDrawArrays(GL_POINTS, 0, world->visual_da.len);
 		
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);

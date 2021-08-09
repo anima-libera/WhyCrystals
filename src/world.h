@@ -2,7 +2,7 @@
 #ifndef WHYCRYSTALS_HEADER_WORLD__
 #define WHYCRYSTALS_HEADER_WORLD__
 
-#include "darray.h"
+#include "da.h"
 #include "visuals.h"
 #include <GL/glew.h>
 #include <stdint.h>
@@ -10,7 +10,7 @@
 #define ENABLE_DEV_OBJECTS
 #undef ENABLE_DEV_OBJECTS
 
-enum object_type_t
+enum obj_type_t
 {
 #ifdef ENABLE_DEV_OBJECTS
 	OT_DEV,
@@ -21,61 +21,61 @@ enum object_type_t
 	OT_PLANT,
 	OT_UNUSED,
 };
-typedef enum object_type_t object_type_t;
+typedef enum obj_type_t obj_type_t;
 
 #ifdef ENABLE_DEV_OBJECTS
-struct object_dev_t
+struct obj_dev_t
 {
 	float x, y, z;
 	unsigned int vi;
 };
-typedef struct object_dev_t object_dev_t;
+typedef struct obj_dev_t obj_dev_t;
 #endif
 
-struct object_player_t
+struct obj_player_t
 {
 	float x, y, z;
 	unsigned int body_vi;
 };
-typedef struct object_player_t object_player_t;
+typedef struct obj_player_t obj_player_t;
 
-struct object_animal_t
+struct obj_animal_t
 {
 	float x, y, z;
 	unsigned int body_vi;
 	
 	float target_x, target_y;
 };
-typedef struct object_animal_t object_animal_t;
+typedef struct obj_animal_t obj_animal_t;
 
-struct object_shot_t
+struct obj_shot_t
 {
 	float x, y, z;
 	unsigned int body_vi;
 	
 	float speed_x, speed_y, speed_z;
 };
-typedef struct object_shot_t object_shot_t;
+typedef struct obj_shot_t obj_shot_t;
 
-struct object_plant_t
+struct obj_plant_t
 {
 	float x, y, z;
 	unsigned int body_vi;
 };
-typedef struct object_plant_t object_plant_t;
+typedef struct obj_plant_t obj_plant_t;
 
-struct object_t
+struct obj_t
 {
 	uint32_t type;
 	union
 	{
-		object_player_t player;
-		object_animal_t animal;
-		object_shot_t shot;
-		object_plant_t plant;
+		obj_player_t player;
+		obj_animal_t animal;
+		obj_shot_t shot;
+		obj_plant_t plant;
 	};
 };
-typedef struct object_t object_t;
+typedef struct obj_t obj_t;
 
 struct tile_type_t
 {
@@ -93,35 +93,35 @@ typedef struct tile_t tile_t;
 struct chunk_t
 {
 	int topleft_x, topleft_y;
-	tile_t* tile_array;
-	darray_t object_darray;
+	tile_t* tile_arr;
+	da_t obj_da;
 };
 typedef struct chunk_t chunk_t;
 
-struct object_index_t
+struct obj_index_t
 {
 	unsigned int chunk_index;
-	unsigned int inchunk_object_index;
+	unsigned int inchunk_obj_index;
 };
-typedef struct object_index_t object_index_t;
+typedef struct obj_index_t obj_index_t;
 
 struct world_t
 {
-	darray_t tile_type_darray;
+	da_t tile_type_da;
 
 	unsigned int chunk_side;
 	int chunk_offset_x, chunk_offset_y;
-	darray_t chunk_darray;
+	da_t chunk_da;
 
-	object_index_t player_object_index;
+	obj_index_t player_obj_index;
 
-	darray_t visual_darray;
-	int visual_modified; /* If visual_darray data must be sent to the GPU. */
+	da_t visual_da;
+	int visual_modified; /* If visual_da data must be sent to the GPU. */
 	GLuint buf_id_visuals;
 };
 typedef struct world_t world_t;
 
-object_t* object_containing(void* object_something);
+obj_t* obj_containing(void* obj_something);
 void world_init(world_t* world);
 void world_cleanup(world_t* world);
 unsigned int generate_tile_type(world_t* world, int x, int y);
@@ -133,7 +133,7 @@ void generate_player(world_t* world);
 void generate_animal(world_t* world, float x, float y);
 void generate_shot(world_t* world, float x, float y);
 void generate_plant(world_t* world, float x, float y);
-object_player_t* get_player(world_t* world);
+obj_player_t* get_player(world_t* world);
 void generate_player_shot(world_t* world);
 visual_t* get_visual(world_t* world, unsigned int vi);
 void move_visual(world_t* world, unsigned int vi, float x, float y, float z);

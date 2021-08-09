@@ -2,6 +2,7 @@
 #include "world.h"
 #include "visuals.h"
 #include "random.h"
+#include "da.h"
 #include <GL/glew.h>
 #include <assert.h>
 #include <math.h>
@@ -9,38 +10,46 @@
 
 #define TAU 6.28318530717
 
-object_t* object_containing(void* object_something)
+obj_t* obj_containing(void* obj_something)
 {
-	return (object_t*)(((char*)object_something) - 4);
+	return (obj_t*)(((char*)obj_something) - 4);
 }
 
-unsigned int chunk_allocate_object(chunk_t* chunk)
+unsigned int chunk_allocate_obj(chunk_t* chunk)
 {
-	for (unsigned int i = 0; i < chunk->object_darray.len; i++)
+	unsigned int res;
+	for (unsigned int i = 0; i < chunk->obj_da.len; i++)
 	{
-		object_t* object = &((object_t*)chunk->object_darray.array)[i];
-		if (object->type == OT_UNUSED)
+		obj_t* obj = da_take_ptr(&chunk->obj_da, sizeof(obj_t), i);
+		int is_unused = obj->type == OT_UNUSED;
+		da_return_ptr(&chunk->obj_da, sizeof(obj_t), obj);
+		if (is_unused)
 		{
 			return i;
 		}
 	}
-	return darray_add_one(&chunk->object_darray, sizeof(object_t));
+	return da_add_one(&chunk->obj_da, sizeof(obj_t));
 }
 
-object_t* chunk_get_object(chunk_t* chunk, unsigned int object_index)
+/* TODO !!!!!!!!!! ! ! ! !!!!!!!!!!!!!!!! ! ! ! !!!!!!!!!!!!!!!!! ! ! !!!!!!!!!!!!!!!!
+ * use da_take_ptr and da_return_ptr everywhere here,
+ * taking notes about how to make it easier and/or less verbose,
+ * then implement these solutions and repeat, until satisfying */
+
+obj_t* chunk_get_obj(chunk_t* chunk, unsigned int obj_index)
 {
-	return &((object_t*)chunk->object_darray.array)[object_index];
+	return &((obj_t*)chunk->obj_da.arr)[obj_index];
 }
 
 void world_init(world_t* world)
 {
-	world->tile_type_darray = (darray_t){0};
+	world->tile_type_da = (da_t){0};
 	world->chunk_side = 9;
 	world->chunk_offset_x = -4;
 	world->chunk_offset_y = -4;
-	world->chunk_darray = (darray_t){0};
-	world->player_object_index = (object_index_t){0};
-	world->visual_darray = (darray_t){0};
+	world->chunk_da = (da_t){0};
+	world->player_obj_index = (obj_index_t){0};
+	world->visual_da = (da_t){0};
 	world->visual_modified = 0;
 	world->buf_id_visuals = 0;
 }
@@ -52,7 +61,7 @@ void world_cleanup(world_t* world)
 
 chunk_t* world_get_chunk(world_t* world, unsigned int chunk_index)
 {
-	return &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	return &((chunk_t*)world->chunk_da.arr)[chunk_index];
 }
 
 unsigned int generate_tile_type(world_t* world, int x, int y)
@@ -70,15 +79,15 @@ unsigned int generate_tile_type(world_t* world, int x, int y)
 
 void generate_tile(world_t* world, unsigned int chunk_index, int x, int y)
 {
-	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	chunk_t* chunk = &((chunk_t*)world->chunk_da.arr)[chunk_index];
 	int inchunk_x = x - chunk->topleft_x;
 	int inchunk_y = y - chunk->topleft_y;
-	tile_t* tile =
-		&chunk->tile_array[inchunk_x + world->chunk_side * inchunk_y];
+	unsigned int tile_index = inchunk_x + world->chunk_side * inchunk_y;
+	tile_t* tile = &chunk->tile_arr[tile_index];
 	tile->type_index = generate_tile_type(world, x, y);
 
-	unsigned int i = darray_add_one(&world->visual_darray, sizeof(visual_t));
-	visual_t* visual = &((visual_t*)world->visual_darray.array)[i];
+	unsigned int vi = da_add_one(&world->visual_da, sizeof(visual_t));
+	visual_t* visual = &((visual_t*)world->visual_da.arr)[vi];
 	visual->x = (float)x;
 	visual->y = (float)y;
 	visual->z = 0.0f;
@@ -92,7 +101,7 @@ void generate_tile(world_t* world, unsigned int chunk_index, int x, int y)
 	visual->texture_rect.origin_y = 0.5f;
 	visual->flags = VISUAL_USED;
 
-	tile->vi = i;
+	tile->vi = vi;
 
 	world->visual_modified = 1;
 }
@@ -100,34 +109,35 @@ void generate_tile(world_t* world, unsigned int chunk_index, int x, int y)
 void generate_chunk(world_t* world, unsigned int chunk_index,
 	int topleft_x, int topleft_y)
 {
-	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
+	chunk_t* chunk = &((chunk_t*)world->chunk_da.arr)[chunk_index];
 	chunk->topleft_x = topleft_x;
 	chunk->topleft_y = topleft_y;
-	chunk->tile_array =
+	chunk->tile_arr =
 		malloc(world->chunk_side * world->chunk_side * sizeof(tile_t));
+	chunk->obj_da = (da_t){0};
 	for (unsigned int inchunk_x = 0; inchunk_x < world->chunk_side; inchunk_x++)
 	for (unsigned int inchunk_y = 0; inchunk_y < world->chunk_side; inchunk_y++)
 	{
 		generate_tile(world, chunk_index,
 			chunk->topleft_x + inchunk_x, chunk->topleft_y + inchunk_y);
 	}
-	chunk->object_darray = (darray_t){0};
 }
 
 void generate_world_map(world_t* world)
 {
-	unsigned int i = darray_add_one(&world->chunk_darray, sizeof(chunk_t));
-	generate_chunk(world, i, world->chunk_offset_x, world->chunk_offset_y);
+	unsigned int chunk_index = da_add_one(&world->chunk_da, sizeof(chunk_t));
+	generate_chunk(world, chunk_index,
+		world->chunk_offset_x, world->chunk_offset_y);
 }
 
 visual_t* get_visual(world_t* world, unsigned int vi)
 {
-	return &((visual_t*)world->visual_darray.array)[vi];
+	return &((visual_t*)world->visual_da.arr)[vi];
 }
 
 unsigned int allocate_visual(world_t* world)
 {
-	for (unsigned int i = 0; i < world->visual_darray.len; i++)
+	for (unsigned int i = 0; i < world->visual_da.len; i++)
 	{
 		visual_t* visual = get_visual(world, i);
 		if ((visual->flags & VISUAL_USED) == 0)
@@ -135,7 +145,7 @@ unsigned int allocate_visual(world_t* world)
 			return i;
 		}
 	}
-	return darray_add_one(&world->visual_darray, sizeof(visual_t));
+	return da_add_one(&world->visual_da, sizeof(visual_t));
 }
 
 void unuse_visual(world_t* world, unsigned int vi)
@@ -152,21 +162,21 @@ void generate_player(world_t* world)
 {
 	unsigned int chunk_index = 0;
 	chunk_t* chunk = world_get_chunk(world, chunk_index);
-	unsigned int inchunk_object_index = chunk_allocate_object(chunk);
-	object_t* object = chunk_get_object(chunk, inchunk_object_index);
+	unsigned int inchunk_obj_index = chunk_allocate_obj(chunk);
+	obj_t* obj = chunk_get_obj(chunk, inchunk_obj_index);
 
-	object->type = OT_PLAYER;
-	object_player_t* player = &object->player;
+	obj->type = OT_PLAYER;
+	obj_player_t* player = &obj->player;
 
 	player->x = 0.0f;
 	player->y = 0.0f;
 	player->z = 0.0f;
 
-	world->player_object_index.chunk_index = chunk_index;
-	world->player_object_index.inchunk_object_index = inchunk_object_index;
+	world->player_obj_index.chunk_index = chunk_index;
+	world->player_obj_index.inchunk_obj_index = inchunk_obj_index;
 
-	unsigned int vi = allocate_visual(world);
-	visual_t* visual = get_visual(world, vi);
+	player->body_vi = allocate_visual(world);
+	visual_t* visual = get_visual(world, player->body_vi);
 	visual->x = (float)player->x;
 	visual->y = (float)player->y;
 	visual->z = (float)player->z;
@@ -180,8 +190,6 @@ void generate_player(world_t* world)
 	visual->texture_rect.origin_y = 0.0f;
 	visual->flags = VISUAL_USED | VISUAL_VERTICAL;
 
-	player->body_vi = vi;
-
 	world->visual_modified = 1;
 }
 
@@ -189,10 +197,10 @@ void generate_animal(world_t* world, float x, float y)
 {
 	unsigned int chunk_index = 0;
 	chunk_t* chunk = world_get_chunk(world, chunk_index);
-	object_t* object = chunk_get_object(chunk, chunk_allocate_object(chunk));
+	obj_t* obj = chunk_get_obj(chunk, chunk_allocate_obj(chunk));
 
-	object->type = OT_ANIMAL;
-	object_animal_t* animal = &object->animal;
+	obj->type = OT_ANIMAL;
+	obj_animal_t* animal = &obj->animal;
 
 	animal->x = x;
 	animal->y = y;
@@ -224,10 +232,10 @@ void generate_shot(world_t* world, float x, float y)
 {
 	unsigned int chunk_index = 0;
 	chunk_t* chunk = world_get_chunk(world, chunk_index);
-	object_t* object = chunk_get_object(chunk, chunk_allocate_object(chunk));
+	obj_t* obj = chunk_get_obj(chunk, chunk_allocate_obj(chunk));
 
-	object->type = OT_SHOT;
-	object_shot_t* shot = &object->shot;
+	obj->type = OT_SHOT;
+	obj_shot_t* shot = &obj->shot;
 
 	shot->x = x;
 	shot->y = y;
@@ -259,12 +267,12 @@ void generate_shot(world_t* world, float x, float y)
 void generate_plant(world_t* world, float x, float y)
 {
 	unsigned int chunk_index = 0;
-	chunk_t* chunk = &((chunk_t*)world->chunk_darray.array)[chunk_index];
-	unsigned int i = darray_add_one(&chunk->object_darray, sizeof(object_t));
-	object_t* object = &((object_t*)chunk->object_darray.array)[i];
+	chunk_t* chunk = &((chunk_t*)world->chunk_da.arr)[chunk_index];
+	unsigned int i = da_add_one(&chunk->obj_da, sizeof(obj_t));
+	obj_t* obj = &((obj_t*)chunk->obj_da.arr)[i];
 
-	object->type = OT_PLANT;
-	object_plant_t* plant = &object->plant;
+	obj->type = OT_PLANT;
+	obj_plant_t* plant = &obj->plant;
 
 	plant->x = x;
 	plant->y = y;
@@ -290,22 +298,22 @@ void generate_plant(world_t* world, float x, float y)
 	world->visual_modified = 1;
 }
 
-object_player_t* get_player(world_t* world)
+obj_player_t* get_player(world_t* world)
 {
-	unsigned int chunk_index = world->player_object_index.chunk_index;
+	unsigned int chunk_index = world->player_obj_index.chunk_index;
 	chunk_t* chunk = world_get_chunk(world, chunk_index);
-	object_t* object = chunk_get_object(chunk,
-		world->player_object_index.inchunk_object_index);
+	obj_t* obj = chunk_get_obj(chunk,
+		world->player_obj_index.inchunk_obj_index);
 
-	assert(object->type == OT_PLAYER);
-	object_player_t* player = &object->player;
+	assert(obj->type == OT_PLAYER);
+	obj_player_t* player = &obj->player;
 
 	return player;
 }
 
 void generate_player_shot(world_t* world)
 {
-	object_player_t* player = get_player(world);
+	obj_player_t* player = get_player(world);
 
 	generate_shot(world, player->x, player->y);
 }
@@ -323,7 +331,7 @@ void move_visual(world_t* world, unsigned int vi, float x, float y, float z)
 
 void move_player(world_t* world, float diff_x, float diff_y)
 {
-	object_player_t* player = get_player(world);
+	obj_player_t* player = get_player(world);
 
 	player->x += diff_x;
 	player->y += diff_y;
@@ -341,7 +349,7 @@ float dist(float x_a, float y_a, float z_a, float x_b, float y_b, float z_b)
 }
 
 void animal_iter(world_t* world, unsigned int chunk_index,
-	object_animal_t* animal)
+	obj_animal_t* animal)
 {
 	(void)chunk_index;
 
@@ -381,7 +389,7 @@ void animal_iter(world_t* world, unsigned int chunk_index,
 }
 
 void shot_iter(world_t* world, unsigned int chunk_index,
-	object_shot_t* shot)
+	obj_shot_t* shot)
 {
 
 	shot->x += shot->speed_x;
@@ -397,30 +405,30 @@ void shot_iter(world_t* world, unsigned int chunk_index,
 
 	if (shot->z <= 0.0f)
 	{
-		object_t* object = object_containing(shot);
-		object->type = OT_UNUSED;
+		obj_t* obj = obj_containing(shot);
+		obj->type = OT_UNUSED;
 
 		unuse_visual(world, shot->body_vi);
 	}
 
 	chunk_t* chunk = world_get_chunk(world, chunk_index);
-	for (unsigned int i = 0; i < chunk->object_darray.len; i++)
+	for (unsigned int i = 0; i < chunk->obj_da.len; i++)
 	{
-		object_t* object = chunk_get_object(chunk, i);
-		if (object->type == OT_ANIMAL)
+		obj_t* obj = chunk_get_obj(chunk, i);
+		if (obj->type == OT_ANIMAL)
 		{
-			object_animal_t* animal = &object->animal;
+			obj_animal_t* animal = &obj->animal;
 			float d = dist(shot->x, shot->y, shot->z,
 				animal->x, animal->y, animal->z);
 			if (d < 0.5f)
 			{
-				object_t* object = object_containing(animal);
-				object->type = OT_UNUSED;
+				obj_t* obj = obj_containing(animal);
+				obj->type = OT_UNUSED;
 
 				unuse_visual(world, animal->body_vi);
 
-				object = object_containing(shot);
-				object->type = OT_UNUSED;
+				obj = obj_containing(shot);
+				obj->type = OT_UNUSED;
 
 				unuse_visual(world, shot->body_vi);
 			}
@@ -431,17 +439,17 @@ void shot_iter(world_t* world, unsigned int chunk_index,
 void chunk_iter(world_t* world, unsigned int chunk_index)
 {
 	chunk_t* chunk = world_get_chunk(world, chunk_index);
-	for (unsigned int i = 0; i < chunk->object_darray.len; i++)
+	for (unsigned int i = 0; i < chunk->obj_da.len; i++)
 	{
-		object_t* object = chunk_get_object(chunk, i);
-		if (object->type == OT_ANIMAL)
+		obj_t* obj = chunk_get_obj(chunk, i);
+		if (obj->type == OT_ANIMAL)
 		{
-			object_animal_t* animal = &object->animal;
+			obj_animal_t* animal = &obj->animal;
 			animal_iter(world, chunk_index, animal);
 		}
-		else if (object->type == OT_SHOT)
+		else if (obj->type == OT_SHOT)
 		{
-			object_shot_t* shot = &object->shot;
+			obj_shot_t* shot = &obj->shot;
 			shot_iter(world, chunk_index, shot);
 		}
 	}
@@ -449,7 +457,7 @@ void chunk_iter(world_t* world, unsigned int chunk_index)
 
 void world_iter(world_t* world)
 {
-	for (unsigned int i = 0; i < world->chunk_darray.len; i++)
+	for (unsigned int i = 0; i < world->chunk_da.len; i++)
 	{
 		chunk_iter(world, i);
 	}

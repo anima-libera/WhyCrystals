@@ -1,5 +1,6 @@
 
 - Make sure darrays are not moved while ptrs to cells are still used (dbg mode)
+- Add __FILE__, __func__ and __LINE__ support in darray safety features
 - Organize world.c better
 - Fill the abreviation table
 - Add turrets
