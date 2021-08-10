@@ -15,6 +15,7 @@ Abreviation | Meanings
 `init`      | initialize
 `len`       | length
 `obj`       | object
+`ptr`       | pointer
 `rect`      | rectangle
 `rg`        | random generator
 `shprog`    | shader program

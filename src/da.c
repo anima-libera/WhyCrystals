@@ -8,8 +8,7 @@ static inline unsigned int umax(unsigned int a, unsigned int b)
 	return a > b ? a : b;
 }
 
-void da_resize(da_t* da, unsigned int elem_size,
-	unsigned int new_len)
+void da_resize(da_t* da, unsigned int elem_size, unsigned int new_len)
 {
 	#ifdef DEBUG
 		assert(da->taken_ptr_count == 0);
@@ -26,8 +25,7 @@ void da_resize(da_t* da, unsigned int elem_size,
 	da->len = new_len;
 }
 
-unsigned int da_add_len(da_t* da, unsigned int elem_size,
-	int len_inc)
+unsigned int da_add_len(da_t* da, unsigned int elem_size, int len_inc)
 {
 	unsigned int old_len = da->len;
 	da_resize(da, elem_size, da->len + len_inc);
@@ -41,18 +39,16 @@ unsigned int da_add_one(da_t* da, unsigned int elem_size)
 
 #ifdef DEBUG
 
-void* da_take_ptr(da_t* da, unsigned int elem_size,
-	unsigned int index)
+void* da_take_ptr(da_t* da, unsigned int elem_size, unsigned int index)
 {
 	da->taken_ptr_count++;
 	return (char*)da->arr + index * elem_size;
 }
 
-void da_return_ptr(da_t* da, unsigned int elem_size, void* ptr)
+void da_giveback_ptr(da_t* da, unsigned int elem_size, void* ptr)
 {
 	assert((char*)da->arr <= (char*)ptr);
-	assert((char*)ptr + elem_size <=
-		(char*)da->arr + da->len * elem_size);
+	assert((char*)ptr + elem_size <= (char*)da->arr + da->len * elem_size);
 	assert(da->taken_ptr_count >= 1);
 	da->taken_ptr_count--;
 }

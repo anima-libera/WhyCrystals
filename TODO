@@ -1,6 +1,22 @@
 
+- TODO
+  Instead of useing take and giveback functions that will definitely do shit,
+  simply make some macros and use the indices, always,
+  this may actually solve all the problems, and doing arithmetic is not
+  what makes programs slow...
+
+- TODO
+  Think aout (but do not implemet yet) a system that would allow to queue tasks
+  related to things such as spawning an animal or a bunch of particles,
+  and executes them at some point in the game loop
+
+- TODO
+  ACTUALLY JUST IMPLEMENT SOME VARIATION OF AN ECS
+
 - Make sure darrays are not moved while ptrs to cells are still used (dbg mode)
 - Add __FILE__, __func__ and __LINE__ support in darray safety features
+- Document headers such as da.h
+- Replace assert by a custom ASSERT macro with nice explainations
 - Organize world.c better
 - Fill the abreviation table
 - Add turrets
@@ -24,4 +40,5 @@
 - Add wrappers around the allocator functions to catch errors and leaks
 - Fix all the leaks
 - Use glBufferSubData instead of glBufferData when possible
+- Optimize out take and giveback functions for release builds
 - Expand the TODO list
