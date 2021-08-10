@@ -18,6 +18,8 @@ size_t write(int fd, const void* buf, size_t count);
 
 int main(int argc, char** argv)
 {
+	printf("test\n");
+
 	int test_randon_generator = 0;
 	for (unsigned int i = 1; i < (unsigned int)argc; i++)
 	{
