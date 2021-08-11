@@ -2,9 +2,12 @@
 #include "window.h"
 #include "shaders.h"
 #include "random.h"
+#if 0
 #include "da.h"
 #include "world.h"
 #include "visuals.h"
+#endif
+#include "obj.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <stdlib.h>
@@ -18,7 +21,7 @@ size_t write(int fd, const void* buf, size_t count);
 
 int main(int argc, char** argv)
 {
-	printf("test\n");
+	//printf("test\n");
 
 	int test_randon_generator = 0;
 	for (unsigned int i = 1; i < (unsigned int)argc; i++)
@@ -61,6 +64,7 @@ int main(int argc, char** argv)
 
 	glEnable(GL_DEPTH_TEST);
 
+	#if 0
 	generate_texture_map();
 
 	world_t* world = malloc(sizeof(world_t));
@@ -81,6 +85,7 @@ int main(int argc, char** argv)
 	}
 
 	glGenBuffers(1, &world->buf_id_visuals);
+	#endif
 
 	int running = 1;
 	while (running)
@@ -99,6 +104,7 @@ int main(int argc, char** argv)
 						case SDLK_ESCAPE:
 							running = 0;
 						break;
+						#if 0
 						case SDLK_UP:
 							move_player(world, 0.0f, +0.05f);
 						break;
@@ -114,11 +120,13 @@ int main(int argc, char** argv)
 						case SDLK_s:
 							generate_player_shot(world);
 						break;
+						#endif
 					}
 				break;
 			}
 		}
 
+		#if 0
 		world_iter(world);
 
 		if (world->visual_modified)
@@ -130,10 +138,12 @@ int main(int argc, char** argv)
 
 			world->visual_modified = 0;
 		}
+		#endif
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		#if 0
 		glUseProgram(g_shprog_draw_visuals);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
@@ -168,6 +178,7 @@ int main(int argc, char** argv)
 		glDisableVertexAttribArray(3);
 		glDisableVertexAttribArray(4);
 		glUseProgram((GLuint)0);
+		#endif
 
 		SDL_GL_SwapWindow(g_window);
 	}

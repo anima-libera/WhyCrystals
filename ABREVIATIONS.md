@@ -10,11 +10,14 @@ Abreviation | Meanings
 `arr`       | array
 `buf`       | buffer
 `cap`       | capacity
+`col`       | column
 `da`        | dynamic array
 `h`         | height
 `init`      | initialize
 `len`       | length
 `obj`       | object
+`pos`       | position
+`prop`      | property
 `ptr`       | pointer
 `rect`      | rectangle
 `rg`        | random generator
