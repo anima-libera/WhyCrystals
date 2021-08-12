@@ -1,6 +1,6 @@
 
-#ifndef WHYCRYSTALS_HEADER_OBJ__
-#define WHYCRYSTALS_HEADER_OBJ__
+#ifndef WHYCRYSTALS_HEADER_OCTA__
+#define WHYCRYSTALS_HEADER_OCTA__
 
 struct flags_bit_set_t
 {
@@ -95,4 +95,4 @@ oi_t octa_alloc_obj(const ptis_t* ptis);
 void* octa_get_obj_prop(oi_t oi, pti_t pti);
 void octa_print(void);
 
-#endif /* WHYCRYSTALS_HEADER_OBJ__ */
+#endif /* WHYCRYSTALS_HEADER_OCTA__ */

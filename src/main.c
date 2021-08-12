@@ -7,7 +7,7 @@
 #include "world.h"
 #include "visuals.h"
 #endif
-#include "obj.h"
+#include "octa.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <stdlib.h>
