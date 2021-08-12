@@ -1,14 +1,33 @@
 
 #include "octa.h"
+#include <GL/glew.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
 
+void flags_col_givetoshader(GLuint attrib_index)
+{
+	glVertexAttribIPointer(attrib_index, 1, GL_UNSIGNED_INT,
+		sizeof(flags_t), (void*)offsetof(flags_t, plain));
+}
+
+void pos_col_givetoshader(GLuint attrib_index)
+{
+	glVertexAttribPointer(attrib_index, 3, GL_FLOAT, GL_FALSE,
+		sizeof(pos_t), (void*)offsetof(pos_t, x));
+}
+
+void color_col_givetoshader(GLuint attrib_index)
+{
+	glVertexAttribPointer(attrib_index, 3, GL_FLOAT, GL_FALSE,
+		sizeof(color_t), (void*)offsetof(color_t, r));
+}
+
 const porp_info_t g_prop_info_table[PROP_TYPE_COUNT] = {
-	[PTI_FLAGS] = {.name = "flags", .size = sizeof(flags_t)},
-	[PTI_POS] = {.name = "pos", .size = sizeof(pos_t)},
-	[PTI_COLOR] = {.name = "color", .size = sizeof(color_t)},
+	[PTI_FLAGS] = FLAGS_INFO,
+	[PTI_POS] = POS_INFO,
+	[PTI_COLOR] = COLOR_INFO,
 };
 
 octa_t g_octa = {0};

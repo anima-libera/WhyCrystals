@@ -247,13 +247,9 @@ int main(int argc, char** argv)
 		glEnableVertexAttribArray(1);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
-		glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT,
-			sizeof(flags_t),
-			(void*)offsetof(flags_t, plain));
+		flags_col_givetoshader(0);
 		glBindBuffer(GL_ARRAY_BUFFER, pos_buf_id);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-			sizeof(pos_t),
-			(void*)offsetof(pos_t, x));
+		pos_col_givetoshader(1);
 
 		glDrawArrays(GL_POINTS, 0, 4);
 

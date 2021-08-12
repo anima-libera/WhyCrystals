@@ -2,6 +2,8 @@
 #ifndef WHYCRYSTALS_HEADER_OCTA__
 #define WHYCRYSTALS_HEADER_OCTA__
 
+#include <GL/glew.h>
+
 struct flags_bit_set_t
 {
 	unsigned int exists: 1;
@@ -16,17 +18,44 @@ union flags_t
 };
 typedef union flags_t flags_t;
 
+void flags_col_givetoshader(GLuint attrib_index);
+
+#define FLAGS_INFO \
+	{ \
+		.name = "flags", \
+		.size = sizeof(flags_t), \
+		.col_givetoshader_callback = flags_col_givetoshader, \
+	}
+
 struct pos_t
 {
 	float x, y, z;
 };
 typedef struct pos_t pos_t;
 
+void pos_col_givetoshader(GLuint attrib_index);
+
+#define POS_INFO \
+	{ \
+		.name = "pos", \
+		.size = sizeof(pos_t), \
+		.col_givetoshader_callback = pos_col_givetoshader, \
+	}
+
 struct color_t
 {
 	float r, g, b;
 };
 typedef struct color_t color_t;
+
+void color_col_givetoshader(GLuint attrib_index);
+
+#define COLOR_INFO \
+	{ \
+		.name = "color", \
+		.size = sizeof(color_t), \
+		.col_givetoshader_callback = color_col_givetoshader, \
+	}
 
 enum pti_t
 {
@@ -43,6 +72,7 @@ struct porp_info_t
 {
 	const char* name;
 	unsigned int size; /* Would be sizeof(flags_t) if name was "flags". */
+	void (*col_givetoshader_callback)(GLuint attrib_index);
 };
 typedef struct porp_info_t porp_info_t;
 
@@ -61,11 +91,20 @@ void ptis_copy(const ptis_t* src, ptis_t* dst);
 int pti_eq(const ptis_t* a, const ptis_t* b);
 void ptis_print(const ptis_t* ptis);
 
+struct col_t
+{
+	pti_t pti;
+	GLuint opengl_buf_id;
+	void* data;
+};
+typedef struct col_t col_t;
+
 struct colt_t
 {
 	unsigned int row_count;
 	ptis_t ptis;
 	void** col_data_arr; /* TODO: Remove one indirection. */
+	GLuint* opengl_buf_id_arr;
 };
 typedef struct colt_t colt_t;
 
