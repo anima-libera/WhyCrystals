@@ -22,8 +22,6 @@ size_t write(int fd, const void* buf, size_t count);
 
 int main(int argc, char** argv)
 {
-	//printf("test\n");
-
 	ptis_t ptis_a = {0};
 	ptis_add(&ptis_a, PTI_FLAGS);
 	ptis_add(&ptis_a, PTI_COLOR);
@@ -36,10 +34,18 @@ int main(int argc, char** argv)
 	octa_print(); fputs("\n", stdout);
 	flags_t* flags = octa_get_obj_prop(oi, PTI_FLAGS);
 	flags->bit_set.exists = 1;
+	pos_t* pos = octa_get_obj_prop(oi, PTI_POS);
+	pos->x = 0.0f;
+	pos->y = 0.0f;
+	pos->z = 0.0f;
 	octa_print(); fputs("\n", stdout);
 	oi = octa_alloc_obj(&ptis_a);
 	flags = octa_get_obj_prop(oi, PTI_FLAGS);
 	flags->bit_set.exists = 1;
+	pos = octa_get_obj_prop(oi, PTI_POS);
+	pos->x = 3.0f;
+	pos->y = 1.0f;
+	pos->z = 0.0f;
 	octa_print(); fputs("\n", stdout);
 
 	ptis_t ptis_b = {0};
@@ -48,14 +54,13 @@ int main(int argc, char** argv)
 	oi = octa_alloc_obj(&ptis_b);
 	flags = octa_get_obj_prop(oi, PTI_FLAGS);
 	flags->bit_set.exists = 1;
+	pos = octa_get_obj_prop(oi, PTI_POS);
+	pos->x = 4.0f;
+	pos->y = 4.0f;
+	pos->z = 0.0f;
 	octa_print(); fputs("\n", stdout);
 
-	return 0;
-
-
-
-
-
+	//return 0;
 
 
 
@@ -65,6 +70,10 @@ int main(int argc, char** argv)
 		if (strcmp(argv[i], "-r") == 0)
 		{
 			test_randon_generator = 1;
+		}
+		else if (strcmp(argv[i], "-d") == 0)
+		{
+			fputs("bruh\n", stdout);
 		}
 	}
 
@@ -94,6 +103,7 @@ int main(int argc, char** argv)
 	int window_width, window_height;
 	SDL_GL_GetDrawableSize(g_window, &window_width, &window_height);
 	glProgramUniform2ui(g_shprog_draw_visuals, 1, window_width, window_height);
+	glProgramUniform2ui(g_shprog_draw_pos, 1, window_width, window_height);
 
 	g_rg = malloc(sizeof(rg_t));
 	rg_time_seed(g_rg);
@@ -122,6 +132,22 @@ int main(int argc, char** argv)
 
 	glGenBuffers(1, &world->buf_id_visuals);
 	#endif
+
+
+	GLuint flags_buf_id;
+	GLuint pos_buf_id;
+
+	glGenBuffers(1, &flags_buf_id);
+	glGenBuffers(1, &pos_buf_id);
+
+	glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
+	glBufferData(GL_ARRAY_BUFFER,
+		4 * sizeof(flags_t),
+		octa_get_obj_prop((oi_t){0, 0}, PTI_FLAGS), GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, pos_buf_id);
+	glBufferData(GL_ARRAY_BUFFER,
+		4 * sizeof(pos_t),
+		octa_get_obj_prop((oi_t){0, 0}, PTI_POS), GL_DYNAMIC_DRAW);
 
 	int running = 1;
 	while (running)
@@ -215,6 +241,25 @@ int main(int argc, char** argv)
 		glDisableVertexAttribArray(4);
 		glUseProgram((GLuint)0);
 		#endif
+
+		glUseProgram(g_shprog_draw_pos);
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
+		glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT,
+			sizeof(flags_t),
+			(void*)offsetof(flags_t, plain));
+		glBindBuffer(GL_ARRAY_BUFFER, pos_buf_id);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+			sizeof(pos_t),
+			(void*)offsetof(pos_t, x));
+
+		glDrawArrays(GL_POINTS, 0, 4);
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glUseProgram((GLuint)0);
 
 		SDL_GL_SwapWindow(g_window);
 	}

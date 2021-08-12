@@ -11,6 +11,7 @@
  * They are set to valid shader program id values by a call to shprog_build_all
  * and unset by a call to shprog_destroy_all. */
 extern GLuint g_shprog_draw_visuals;
+extern GLuint g_shprog_draw_pos;
 
 /* Builds all the shader programs.
  * Returns -1 if anything goes wrong, returns 0 if everything goes well. */
