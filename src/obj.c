@@ -19,52 +19,52 @@ void pti_print(pti_t pti)
 	fputs(g_prop_info_table[pti].name, stdout);
 }
 
-void pti_set_add(pti_set_t* pti_set, pti_t pti)
+void ptis_add(ptis_t* ptis, pti_t pti)
 {
-	if (pti_set->len == 0)
+	if (ptis->len == 0)
 	{
-		pti_set->arr = malloc(sizeof(pti_t));
-		pti_set->arr[0] = pti;
-		pti_set->len = 1;
+		ptis->arr = malloc(sizeof(pti_t));
+		ptis->arr[0] = pti;
+		ptis->len = 1;
 		return;
 	}
-	unsigned int new_len = pti_set->len + 1;
-	pti_set->arr = realloc(pti_set->arr, new_len * sizeof(pti_t));
+	unsigned int new_len = ptis->len + 1;
+	ptis->arr = realloc(ptis->arr, new_len * sizeof(pti_t));
 	/* As arr should always be sorted, the good spot is searched for from the
 	 * right and ptis greater than the new one are shifted to the right. */
-	unsigned int i = pti_set->len - 1;
+	unsigned int i = ptis->len - 1;
 	while (1)
 	{
-		if (pti_set->arr[i] < pti)
+		if (ptis->arr[i] < pti)
 		{
-			pti_set->arr[i+1] = pti;
+			ptis->arr[i+1] = pti;
 			break;
 		}
-		else if (i == 0) /* && pti_set->arr[i] >= pti */
+		else if (i == 0) /* && ptis->arr[i] >= pti */
 		{
-			assert(pti_set->arr[i] != pti);
-			pti_set->arr[i+1] = pti_set->arr[i];
-			pti_set->arr[i] = pti;
+			assert(ptis->arr[i] != pti);
+			ptis->arr[i+1] = ptis->arr[i];
+			ptis->arr[i] = pti;
 			break;
 		}
 		else
 		{
-			assert(pti_set->arr[i] != pti);
-			pti_set->arr[i+1] = pti_set->arr[i];
+			assert(ptis->arr[i] != pti);
+			ptis->arr[i+1] = ptis->arr[i];
 			i--;
 		}
 	}
-	pti_set->len = new_len;
+	ptis->len = new_len;
 }
 
-void pti_set_copy(const pti_set_t* src, pti_set_t* dst)
+void ptis_copy(const ptis_t* src, ptis_t* dst)
 {
 	dst->arr = malloc(src->len * sizeof(pti_t));
 	memcpy(dst->arr, src->arr, src->len * sizeof(pti_t));
 	dst->len = src->len;
 }
 
-int pti_eq(const pti_set_t* a, const pti_set_t* b)
+int pti_eq(const ptis_t* a, const ptis_t* b)
 {
 	if (a->len != b->len)
 	{
@@ -80,14 +80,14 @@ int pti_eq(const pti_set_t* a, const pti_set_t* b)
 	return 1;
 }
 
-void pti_set_print(const pti_set_t* pti_set)
+void ptis_print(const ptis_t* ptis)
 {
-	fputs("pti_set", stdout);
+	fputs("ptis", stdout);
 	fputs("[", stdout);
-	for (unsigned int i = 0; i < pti_set->len; i++)
+	for (unsigned int i = 0; i < ptis->len; i++)
 	{
-		pti_print(pti_set->arr[i]);
-		if (i != pti_set->len - 1)
+		pti_print(ptis->arr[i]);
+		if (i != ptis->len - 1)
 		{
 			fputs(",", stdout);
 		}
@@ -95,120 +95,110 @@ void pti_set_print(const pti_set_t* pti_set)
 	fputs("]", stdout);
 }
 
-void col_table_init(col_table_t* col_table, const pti_set_t* pti_set)
+void colt_init(colt_t* colt, const ptis_t* ptis)
 {
-	col_table->col_len = 0;
-	pti_set_copy(pti_set, &col_table->pti_set);
-	col_table->col_data_arr = calloc(pti_set->len, sizeof(void*));
+	colt->row_count = 0;
+	ptis_copy(ptis, &colt->ptis);
+	colt->col_data_arr = calloc(ptis->len, sizeof(void*));
 }
 
-void col_table_lengthen(col_table_t* col_table, unsigned int by_how_much)
+void colt_lengthen(colt_t* colt, unsigned int by_how_much)
 {
-	unsigned int new_col_len = col_table->col_len + by_how_much;
-	for (unsigned int i = 0; i < col_table->pti_set.len; i++)
+	unsigned int new_row_count = colt->row_count + by_how_much;
+	for (unsigned int i = 0; i < colt->ptis.len; i++)
 	{
-		unsigned int prop_size =
-			g_prop_info_table[col_table->pti_set.arr[i]].size;
-		col_table->col_data_arr[i] = realloc(col_table->col_data_arr[i],
-			new_col_len * prop_size);
+		unsigned int prop_size = g_prop_info_table[colt->ptis.arr[i]].size;
+		colt->col_data_arr[i] = realloc(colt->col_data_arr[i],
+			new_row_count * prop_size);
 	}
-	assert(col_table->pti_set.arr[0] == PTI_FLAGS);
-	for (unsigned int i = col_table->col_len; i < new_col_len; i++)
+	assert(colt->ptis.arr[0] == PTI_FLAGS);
+	for (unsigned int i = colt->row_count; i < new_row_count; i++)
 	{
-		((flags_t*)col_table->col_data_arr[0])[i].flags = 0;
+		((flags_t*)colt->col_data_arr[0])[i].bit_set.exists = 0;
 	}
-	col_table->col_len = new_col_len;
+	colt->row_count = new_row_count;
 }
 
-int col_table_does_obj_exist(const col_table_t* col_table, unsigned int row_index)
+int colt_does_obj_exist(const colt_t* colt, unsigned int row_index)
 {
-	assert(col_table->pti_set.arr[0] == PTI_FLAGS);
-	unsigned int flags =
-		((flags_t*)col_table->col_data_arr[0])[row_index].flags;
-	return flags & OBJ_FLAG_EXISTS;
+	assert(colt->ptis.arr[0] == PTI_FLAGS);
+	return ((flags_t*)colt->col_data_arr[0])[row_index].bit_set.exists;
 }
 
-void col_table_print(const col_table_t* col_table)
+void colt_print(const colt_t* colt)
 {
-	fputs("col_table", stdout);
+	fputs("colt", stdout);
 	fputs("(", stdout);
-	printf("col_len:%d", col_table->col_len);
+	printf("row_count:%d", colt->row_count);
 	fputs(",", stdout);
-	pti_set_print(&col_table->pti_set);
+	ptis_print(&colt->ptis);
 	fputs(",", stdout);
-	assert(col_table->pti_set.arr[0] == PTI_FLAGS);
+	assert(colt->ptis.arr[0] == PTI_FLAGS);
 	fputs("[", stdout);
-	for (unsigned int i = 0; i < col_table->col_len; i++)
+	for (unsigned int i = 0; i < colt->row_count; i++)
 	{
-		fputs(col_table_does_obj_exist(col_table, i) ? "!" : "_", stdout);
+		fputs(colt_does_obj_exist(colt, i) ? "!" : "_", stdout);
 	}
 	fputs("]", stdout);
 	fputs(")", stdout);
 }
 
-unsigned int octa_add_col_table(const pti_set_t* pti_set)
+unsigned int octa_add_colt(const ptis_t* ptis)
 {
 	g_octa.len++;
-	g_octa.col_table_arr = realloc(g_octa.col_table_arr,
-		g_octa.len * sizeof(col_table_t));
+	g_octa.colt_arr = realloc(g_octa.colt_arr, g_octa.len * sizeof(colt_t));
 	unsigned int index = g_octa.len - 1;
-	col_table_init(&g_octa.col_table_arr[index], pti_set);
+	colt_init(&g_octa.colt_arr[index], ptis);
 	return index;
 }
 
-obj_index_t octa_alloc_obj(const pti_set_t* pti_set)
+oi_t octa_alloc_obj(const ptis_t* ptis)
 {
-	col_table_t* col_table = NULL;
-	unsigned int col_table_index;
+	colt_t* colt = NULL;
+	unsigned int colt_index;
 	for (unsigned int i = 0; i < g_octa.len; i++)
 	{
-		if (pti_eq(&g_octa.col_table_arr[i].pti_set, pti_set))
+		if (pti_eq(&g_octa.colt_arr[i].ptis, ptis))
 		{
-			col_table = &g_octa.col_table_arr[i];
-			col_table_index = i;
+			colt = &g_octa.colt_arr[i];
+			colt_index = i;
 			break;
 		}
 	}
-	if (col_table == NULL)
+	if (colt == NULL)
 	{
-		unsigned int i = octa_add_col_table(pti_set);
-		col_table = &g_octa.col_table_arr[i];
-		col_table_index = i;
+		unsigned int i = octa_add_colt(ptis);
+		colt = &g_octa.colt_arr[i];
+		colt_index = i;
 	}
-	for (unsigned int i = 0; i < col_table->col_len; i++)
+	for (unsigned int i = 0; i < colt->row_count; i++)
 	{
-		if (!col_table_does_obj_exist(col_table, i))
+		if (!colt_does_obj_exist(colt, i))
 		{
-			return (obj_index_t){
-				.col_table_index = col_table_index,
-				.row_index = i
-			};
+			return (oi_t){.colt_index = colt_index, .row_index = i};
 		}
 	}
-	unsigned int old_col_len = col_table->col_len;
-	col_table_lengthen(col_table, col_table->col_len / 2 + 4);
-	return (obj_index_t){
-		.col_table_index = col_table_index,
-		.row_index = old_col_len
-	};
+	unsigned int old_row_count = colt->row_count;
+	colt_lengthen(colt, colt->row_count / 2 + 4);
+	return (oi_t){.colt_index = colt_index, .row_index = old_row_count};
 }
 
-void* octa_get_obj_prop(obj_index_t oi, pti_t pti)
+void* octa_get_obj_prop(oi_t oi, pti_t pti)
 {
-	assert(oi.col_table_index < g_octa.len);
-	col_table_t* col_table = &g_octa.col_table_arr[oi.col_table_index];
-	assert(oi.row_index < col_table->col_len);
+	assert(oi.colt_index < g_octa.len);
+	colt_t* colt = &g_octa.colt_arr[oi.colt_index];
+	assert(oi.row_index < colt->row_count);
 	unsigned int i;
-	for (i = 0; i < col_table->pti_set.len; i++)
+	for (i = 0; i < colt->ptis.len; i++)
 	{
-		if (col_table->pti_set.arr[i] == pti)
+		if (colt->ptis.arr[i] == pti)
 		{
 			break;
 		}
 	}
-	assert(i < col_table->pti_set.len);
-	void* col_data = col_table->col_data_arr[i];
-	unsigned int prop_size = g_prop_info_table[col_table->pti_set.arr[i]].size;
+	assert(i < colt->ptis.len);
+	void* col_data = colt->col_data_arr[i];
+	unsigned int prop_size = g_prop_info_table[colt->ptis.arr[i]].size;
 	return (char*)col_data + oi.row_index * prop_size;
 }
 
@@ -221,7 +211,7 @@ void octa_print(void)
 	fputs("[", stdout);
 	for (unsigned int i = 0; i < g_octa.len; i++)
 	{
-		col_table_print(&g_octa.col_table_arr[i]);
+		colt_print(&g_octa.colt_arr[i]);
 		if (i != g_octa.len - 1)
 		{
 			fputs(",", stdout);

@@ -24,23 +24,30 @@ int main(int argc, char** argv)
 {
 	//printf("test\n");
 
-	pti_set_t pti_set = {0};
-	pti_set_add(&pti_set, PTI_FLAGS);
-	pti_set_add(&pti_set, PTI_COLOR);
-	pti_set_add(&pti_set, PTI_POS);
-	//pti_set_print(&pti_set); fputs("\n", stdout);
+	ptis_t ptis_a = {0};
+	ptis_add(&ptis_a, PTI_FLAGS);
+	ptis_add(&ptis_a, PTI_COLOR);
+	ptis_add(&ptis_a, PTI_POS);
+	//ptis_print(&ptis_a); fputs("\n", stdout);
+	//return 0;
 
 	octa_print(); fputs("\n", stdout);
-	octa_add_col_table(&pti_set);
-	octa_print(); fputs("\n", stdout);
-	obj_index_t oi = octa_alloc_obj(&pti_set);
+	oi_t oi = octa_alloc_obj(&ptis_a);
 	octa_print(); fputs("\n", stdout);
 	flags_t* flags = octa_get_obj_prop(oi, PTI_FLAGS);
-	flags->flags |= OBJ_FLAG_EXISTS;
+	flags->bit_set.exists = 1;
 	octa_print(); fputs("\n", stdout);
-	oi = octa_alloc_obj(&pti_set);
+	oi = octa_alloc_obj(&ptis_a);
 	flags = octa_get_obj_prop(oi, PTI_FLAGS);
-	flags->flags |= OBJ_FLAG_EXISTS;
+	flags->bit_set.exists = 1;
+	octa_print(); fputs("\n", stdout);
+
+	ptis_t ptis_b = {0};
+	ptis_add(&ptis_b, PTI_FLAGS);
+	ptis_add(&ptis_b, PTI_POS);
+	oi = octa_alloc_obj(&ptis_b);
+	flags = octa_get_obj_prop(oi, PTI_FLAGS);
+	flags->bit_set.exists = 1;
 	octa_print(); fputs("\n", stdout);
 
 	return 0;

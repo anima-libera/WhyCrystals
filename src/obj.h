@@ -2,12 +2,19 @@
 #ifndef WHYCRYSTALS_HEADER_OBJ__
 #define WHYCRYSTALS_HEADER_OBJ__
 
-struct flags_t
+struct flags_bit_set_t
 {
-	unsigned int flags;
-	#define OBJ_FLAG_EXISTS 0x1
+	unsigned int exists: 1;
+	#define OBJ_FLAG_EXISTS (1 << 0)
 };
-typedef struct flags_t flags_t;
+typedef struct flags_bit_set_t flags_bit_set_t;
+
+union flags_t
+{
+	unsigned int plain;
+	flags_bit_set_t bit_set;
+};
+typedef union flags_t flags_t;
 
 struct pos_t
 {
@@ -41,50 +48,51 @@ typedef struct porp_info_t porp_info_t;
 
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];
 
-struct pti_set_t
+struct ptis_t
 {
 	unsigned int len;
 	pti_t* arr; /* Should always be sorted. */
+	/* TODO: Remove the indirection, so that colt_t is faster. */
 };
-typedef struct pti_set_t pti_set_t;
+typedef struct ptis_t ptis_t;
 
-void pti_set_add(pti_set_t* pti_set, pti_t pti);
-void pti_set_copy(const pti_set_t* src, pti_set_t* dst);
-int pti_eq(const pti_set_t* a, const pti_set_t* b);
-void pti_set_print(const pti_set_t* pti_set);
+void ptis_add(ptis_t* ptis, pti_t pti);
+void ptis_copy(const ptis_t* src, ptis_t* dst);
+int pti_eq(const ptis_t* a, const ptis_t* b);
+void ptis_print(const ptis_t* ptis);
 
-struct col_table_t
+struct colt_t
 {
-	unsigned int col_len;
-	pti_set_t pti_set;
-	void** col_data_arr;
+	unsigned int row_count;
+	ptis_t ptis;
+	void** col_data_arr; /* TODO: Remove one indirection. */
 };
-typedef struct col_table_t col_table_t;
+typedef struct colt_t colt_t;
 
-void col_table_init(col_table_t* col_table, const pti_set_t* pti_set);
-void col_table_lengthen(col_table_t* col_table, unsigned int by_how_much);
-int col_table_does_obj_exist(const col_table_t* col_table, unsigned int row_index);
-void col_table_print(const col_table_t* col_table);
+void colt_init(colt_t* colt, const ptis_t* ptis);
+void colt_lengthen(colt_t* colt, unsigned int by_how_much);
+int colt_does_obj_exist(const colt_t* colt, unsigned int row_index);
+void colt_print(const colt_t* colt);
 
 struct octa_t
 {
 	unsigned int len;
-	col_table_t* col_table_arr;
+	colt_t* colt_arr;
 };
 typedef struct octa_t octa_t;
 
 extern octa_t g_octa;
 
-struct obj_index_t
+struct oi_t
 {
-	unsigned int col_table_index;
+	unsigned int colt_index;
 	unsigned int row_index;
 };
-typedef struct obj_index_t obj_index_t;
+typedef struct oi_t oi_t;
 
-unsigned int octa_add_col_table(const pti_set_t* pti_set);
-obj_index_t octa_alloc_obj(const pti_set_t* pti_set);
-void* octa_get_obj_prop(obj_index_t oi, pti_t pti);
+unsigned int octa_add_colt(const ptis_t* ptis);
+oi_t octa_alloc_obj(const ptis_t* ptis);
+void* octa_get_obj_prop(oi_t oi, pti_t pti);
 void octa_print(void);
 
 #endif /* WHYCRYSTALS_HEADER_OBJ__ */
