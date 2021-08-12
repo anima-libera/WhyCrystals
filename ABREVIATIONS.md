@@ -12,12 +12,14 @@ Abreviation | Meanings
 `cap`       | capacity
 `col`       | column
 `da`        | dynamic array
+`eq`        | equal
 `h`         | height
 `init`      | initialize
 `len`       | length
 `obj`       | object
 `pos`       | position
 `prop`      | property
+`pti`       | property type id
 `ptr`       | pointer
 `rect`      | rectangle
 `rg`        | random generator

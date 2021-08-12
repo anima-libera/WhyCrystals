@@ -15,11 +15,9 @@
 
 
 
-- Make sure darrays are not moved while ptrs to cells are still used (dbg mode)
-- Add __FILE__, __func__ and __LINE__ support in darray safety features
-- Document headers such as da.h
+- Make a command line based debugging interface
+- Document headers
 - Replace assert by a custom ASSERT macro with nice explainations
-- Organize world.c better
 - Fill the abreviation table
 - Add turrets
 - Make turrets shoot at animals
@@ -28,7 +26,6 @@
 - Make animals on the path want to break the now breakable core
 - Make the player movable by targetting destination via the mouse
 - Make the player shoot in a precise direction via the mouse
-- Make the visual be allocated in free spaces instead of at the darray's end
 - Make the visual dynamic array chunk based, or not, think about it
 - Animate the player and animals walking (on 2 small shitty sprites)
 - Make multiple chunks (do NOT try to optimize anything yet)
@@ -42,5 +39,5 @@
 - Add wrappers around the allocator functions to catch errors and leaks
 - Fix all the leaks
 - Use glBufferSubData instead of glBufferData when possible
-- Optimize out take and giveback functions for release builds
+- Remove at least one indirection in the octa
 - Expand the TODO list

@@ -21,14 +21,16 @@ struct color_t
 };
 typedef struct color_t color_t;
 
-enum prop_type_id_t
+enum pti_t
 {
 	PTI_FLAGS,
 	PTI_POS,
 	PTI_COLOR,
 	PROP_TYPE_COUNT
 };
-typedef enum prop_type_id_t prop_type_id_t;
+typedef enum pti_t pti_t;
+
+void pti_print(pti_t pti);
 
 struct porp_info_t
 {
@@ -39,22 +41,30 @@ typedef struct porp_info_t porp_info_t;
 
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];
 
-#
-
-struct prop_type_id_set_t
+struct pti_set_t
 {
 	unsigned int len;
-	prop_type_id_t* arr;
+	pti_t* arr; /* Should always be sorted. */
 };
-typedef struct prop_type_id_set_t prop_type_id_set_t;
+typedef struct pti_set_t pti_set_t;
+
+void pti_set_add(pti_set_t* pti_set, pti_t pti);
+void pti_set_copy(const pti_set_t* src, pti_set_t* dst);
+int pti_eq(const pti_set_t* a, const pti_set_t* b);
+void pti_set_print(const pti_set_t* pti_set);
 
 struct col_table_t
 {
-	unsigned int each_col_len;
-	prop_type_id_set_t prop_set;
-	void* col_arr;
+	unsigned int col_len;
+	pti_set_t pti_set;
+	void** col_data_arr;
 };
 typedef struct col_table_t col_table_t;
+
+void col_table_init(col_table_t* col_table, const pti_set_t* pti_set);
+void col_table_lengthen(col_table_t* col_table, unsigned int by_how_much);
+int col_table_does_obj_exist(const col_table_t* col_table, unsigned int row_index);
+void col_table_print(const col_table_t* col_table);
 
 struct octa_t
 {
@@ -67,9 +77,14 @@ extern octa_t g_octa;
 
 struct obj_index_t
 {
-	unsigned int table_index;
+	unsigned int col_table_index;
 	unsigned int row_index;
 };
 typedef struct obj_index_t obj_index_t;
+
+unsigned int octa_add_col_table(const pti_set_t* pti_set);
+obj_index_t octa_alloc_obj(const pti_set_t* pti_set);
+void* octa_get_obj_prop(obj_index_t oi, pti_t pti);
+void octa_print(void);
 
 #endif /* WHYCRYSTALS_HEADER_OBJ__ */

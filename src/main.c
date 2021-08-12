@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h> /* strcmp */
 #include <math.h>
 #include <assert.h>
@@ -22,6 +23,34 @@ size_t write(int fd, const void* buf, size_t count);
 int main(int argc, char** argv)
 {
 	//printf("test\n");
+
+	pti_set_t pti_set = {0};
+	pti_set_add(&pti_set, PTI_FLAGS);
+	pti_set_add(&pti_set, PTI_COLOR);
+	pti_set_add(&pti_set, PTI_POS);
+	//pti_set_print(&pti_set); fputs("\n", stdout);
+
+	octa_print(); fputs("\n", stdout);
+	octa_add_col_table(&pti_set);
+	octa_print(); fputs("\n", stdout);
+	obj_index_t oi = octa_alloc_obj(&pti_set);
+	octa_print(); fputs("\n", stdout);
+	flags_t* flags = octa_get_obj_prop(oi, PTI_FLAGS);
+	flags->flags |= OBJ_FLAG_EXISTS;
+	octa_print(); fputs("\n", stdout);
+	oi = octa_alloc_obj(&pti_set);
+	flags = octa_get_obj_prop(oi, PTI_FLAGS);
+	flags->flags |= OBJ_FLAG_EXISTS;
+	octa_print(); fputs("\n", stdout);
+
+	return 0;
+
+
+
+
+
+
+
 
 	int test_randon_generator = 0;
 	for (unsigned int i = 1; i < (unsigned int)argc; i++)
