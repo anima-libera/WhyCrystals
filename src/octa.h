@@ -125,9 +125,11 @@ struct colt_t
 	col_t col_arr[];
 };
 typedef struct colt_t colt_t;
+typedef struct oi_t oi_t;
 
 colt_t* colt_alloc(const ptis_t* ptis);
 void colt_add_rows(colt_t* colt, unsigned int how_much);
+oi_t colt_alloc_obj(colt_t* colt);
 void colt_print(const colt_t* colt);
 
 #if 0
@@ -151,6 +153,8 @@ struct oi_t
 	unsigned int row_index;
 };
 typedef struct oi_t oi_t;
+
+void* oi_get_prop(oi_t oi, pti_t pti);
 
 #if 0
 unsigned int octa_add_colt(const ptis_t* ptis);

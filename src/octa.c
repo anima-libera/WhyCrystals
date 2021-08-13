@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 #include <assert.h>
 
 void flags_col_givetoshader(GLuint attrib_index)
@@ -77,11 +78,31 @@ void colt_add_rows(colt_t* colt, unsigned int how_much)
 			colt->col_arr[i].data, GL_DYNAMIC_DRAW);
 	}
 	assert(colt->col_arr[0].pti == PTI_FLAGS);
-	for (unsigned int i = colt->col_count; i < new_row_count; i++)
+	for (unsigned int i = colt->row_count; i < new_row_count; i++)
 	{
 		((flags_t*)colt->col_arr[0].data)[i].bit_set.exists = 0;
 	}
 	colt->row_count = new_row_count;
+}
+
+static int colt_is_row_used(const colt_t* colt, unsigned int row_index)
+{
+	assert(colt->col_arr[0].pti == PTI_FLAGS);
+	return ((flags_t*)colt->col_arr[0].data)[row_index].bit_set.exists;
+}
+
+oi_t colt_alloc_obj(colt_t* colt)
+{
+	for (unsigned int i = 0; i < colt->row_count; i++)
+	{
+		if (!colt_is_row_used(colt, i))
+		{
+			return (oi_t){.colt = colt, .row_index = i};
+		}
+	}
+	unsigned int first_new_index = colt->row_count;
+	colt_add_rows(colt, colt->row_count / 2 + 4);
+	return (oi_t){.colt = colt, .row_index = first_new_index};
 }
 
 void colt_print(const colt_t* colt)
@@ -111,6 +132,43 @@ void colt_print(const colt_t* colt)
 	printf("]");
 	printf(",");
 	printf("rowcount:%u", colt->row_count);
+	printf(",");
+	printf("used:");
+	printf("[");
+	int is_first = 1;
+	for (unsigned int i = 0; i < colt->row_count; i++)
+	{
+		if (colt_is_row_used(colt, i))
+		{
+			if (is_first)
+			{
+				is_first = 0;
+			}
+			else
+			{
+				printf(",");
+			}
+			printf("%u", i);
+		}
+	}
+	printf("]");
+}
+
+void* oi_get_prop(oi_t oi, pti_t pti)
+{
+	unsigned int col_index = UINT_MAX;
+	for (unsigned int i = 0; i < oi.colt->col_count; i++)
+	{
+		if (oi.colt->col_arr[i].pti == pti)
+		{
+			col_index = i;
+			break;
+		}
+	}
+	assert(col_index != UINT_MAX);
+	char* data = oi.colt->col_arr[col_index].data;
+	unsigned int prop_size = g_prop_info_table[pti].size;
+	return data + oi.row_index * prop_size;
 }
 
 #if 0

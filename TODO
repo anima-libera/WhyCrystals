@@ -13,8 +13,7 @@
 - TODO
   ACTUALLY JUST IMPLEMENT SOME VARIATION OF AN ECS
 
-
-
+- Make a property know whether it is OpenGL-buffer-izable or not
 - Make a command line based debugging interface
 - Document headers
 - Replace assert by a custom ASSERT macro with nice explainations

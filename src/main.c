@@ -164,11 +164,21 @@ int main(int argc, char** argv)
 
 	colt_t* colt = colt_alloc(ptis);
 	colt_print(colt); printf("\n");
-	colt_add_rows(colt, 4);
+	oi_t oi = colt_alloc_obj(colt);
+	colt_print(colt); printf("\n");
+	flags_t* flags = oi_get_prop(oi, PTI_FLAGS);
+	flags->bit_set.exists = 1;
+	pos_t* pos = oi_get_prop(oi, PTI_POS);
+	*pos = (pos_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
+	colt_print(colt); printf("\n");
+	oi = colt_alloc_obj(colt);
+	flags = oi_get_prop(oi, PTI_FLAGS);
+	flags->bit_set.exists = 1;
+	pos = oi_get_prop(oi, PTI_POS);
+	*pos = (pos_t){.x = 3.0f, .y = 1.0f, .z = 0.0f};
 	colt_print(colt); printf("\n");
 
-
-	return 0;
+	//return 0;
 
 
 
@@ -298,18 +308,42 @@ int main(int argc, char** argv)
 		#endif
 
 		glUseProgram(g_shprog_draw_pos);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
+		for (unsigned int i = 0; i < 2; i++)
+		{
+			glEnableVertexAttribArray(i);
+		}
 		
+		#if 0
 		glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
 		flags_col_givetoshader(0);
 		glBindBuffer(GL_ARRAY_BUFFER, pos_buf_id);
 		pos_col_givetoshader(1);
+		#endif
 
-		glDrawArrays(GL_POINTS, 0, 4);
+		unsigned int col_index = 0;
+		unsigned int attrib_index = 0;
+		pti_t pti = colt->col_arr[col_index].pti;
+		glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[col_index].opengl_buf_id);
+		glBufferSubData(GL_ARRAY_BUFFER, 0,
+			colt->row_count * g_prop_info_table[pti].size,
+			colt->col_arr[col_index].data);
+		g_prop_info_table[pti].col_givetoshader_callback(attrib_index);
+		
+		col_index = 1;
+		attrib_index = 1;
+		pti = colt->col_arr[col_index].pti;
+		glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[col_index].opengl_buf_id);
+		glBufferSubData(GL_ARRAY_BUFFER, 0,
+			colt->row_count * g_prop_info_table[pti].size,
+			colt->col_arr[col_index].data);
+		g_prop_info_table[pti].col_givetoshader_callback(attrib_index);
 
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
+		glDrawArrays(GL_POINTS, 0, colt->row_count);
+
+		for (unsigned int i = 0; i < 2; i++)
+		{
+			glDisableVertexAttribArray(i);
+		}
 		glUseProgram((GLuint)0);
 
 		SDL_GL_SwapWindow(g_window);
