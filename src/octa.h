@@ -71,13 +71,13 @@ void pti_print(pti_t pti);
 struct porp_info_t
 {
 	const char* name;
-	unsigned int size; /* Would be sizeof(flags_t) if name was "flags". */
+	unsigned int size; /* sizeof(thing_t) */
 	void (*col_givetoshader_callback)(GLuint attrib_index);
 };
 typedef struct porp_info_t porp_info_t;
-
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];
 
+#if 0
 struct ptis_t
 {
 	unsigned int len;
@@ -90,6 +90,25 @@ void ptis_add(ptis_t* ptis, pti_t pti);
 void ptis_copy(const ptis_t* src, ptis_t* dst);
 int pti_eq(const ptis_t* a, const ptis_t* b);
 void ptis_print(const ptis_t* ptis);
+#endif
+
+struct ptis_t
+{
+	unsigned int len;
+	pti_t arr[]; /* Should be sorted. */
+};
+typedef struct ptis_t ptis_t;
+
+#define PTIS_ALLOC(pti_ptr_, ...) \
+	do \
+	{ \
+		const pti_t pti_array[] = {__VA_ARGS__}; \
+		pti_ptr_ = malloc(sizeof(ptis_t) + sizeof(pti_array)); \
+		pti_ptr_->len = sizeof(pti_array) / sizeof(pti_t); \
+		memcpy(&pti_ptr_->arr, pti_array, sizeof(pti_array)); \
+	} while (0)
+
+void ptis_print(const ptis_t* ptis);
 
 struct col_t
 {
@@ -101,37 +120,43 @@ typedef struct col_t col_t;
 
 struct colt_t
 {
+	unsigned int col_count;
 	unsigned int row_count;
-	ptis_t ptis;
-	void** col_data_arr; /* TODO: Remove one indirection. */
-	GLuint* opengl_buf_id_arr;
+	col_t col_arr[];
 };
 typedef struct colt_t colt_t;
 
+colt_t* colt_alloc(const ptis_t* ptis);
+void colt_add_rows(colt_t* colt, unsigned int how_much);
+void colt_print(const colt_t* colt);
+
+#if 0
 void colt_init(colt_t* colt, const ptis_t* ptis);
 void colt_lengthen(colt_t* colt, unsigned int by_how_much);
 int colt_does_obj_exist(const colt_t* colt, unsigned int row_index);
 void colt_print(const colt_t* colt);
+#endif
 
 struct octa_t
 {
 	unsigned int len;
-	colt_t* colt_arr;
+	colt_t** colt_arr;
 };
 typedef struct octa_t octa_t;
-
 extern octa_t g_octa;
 
 struct oi_t
 {
-	unsigned int colt_index;
+	colt_t* colt;
 	unsigned int row_index;
 };
 typedef struct oi_t oi_t;
 
+#if 0
 unsigned int octa_add_colt(const ptis_t* ptis);
 oi_t octa_alloc_obj(const ptis_t* ptis);
 void* octa_get_obj_prop(oi_t oi, pti_t pti);
 void octa_print(void);
+#endif
 
 #endif /* WHYCRYSTALS_HEADER_OCTA__ */

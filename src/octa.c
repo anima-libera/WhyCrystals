@@ -30,6 +30,91 @@ const porp_info_t g_prop_info_table[PROP_TYPE_COUNT] = {
 	[PTI_COLOR] = COLOR_INFO,
 };
 
+void pti_print(pti_t pti)
+{
+	assert(pti < PROP_TYPE_COUNT);
+	printf("%s", g_prop_info_table[pti].name);
+}
+
+void ptis_print(const ptis_t* ptis)
+{
+	printf("[");
+	for (unsigned int i = 0; i < ptis->len; i++)
+	{
+		pti_print(ptis->arr[i]);
+		if (i != ptis->len - 1)
+		{
+			printf(",");
+		}
+	}
+	printf("]");
+}
+
+colt_t* colt_alloc(const ptis_t* ptis)
+{
+	colt_t* colt = malloc(sizeof(colt_t) + sizeof(col_t) * ptis->len);
+	colt->col_count = ptis->len;
+	for (unsigned int i = 0; i < colt->col_count; i++)
+	{
+		colt->col_arr[i].pti = ptis->arr[i];
+		glGenBuffers(1, &colt->col_arr[i].opengl_buf_id);
+		colt->col_arr[i].data = NULL;
+	}
+	colt->row_count = 0;
+	return colt;
+}
+
+void colt_add_rows(colt_t* colt, unsigned int how_much)
+{
+	unsigned int new_row_count = colt->row_count + how_much;
+	for (unsigned int i = 0; i < colt->col_count; i++)
+	{
+		unsigned int prop_size = g_prop_info_table[colt->col_arr[i].pti].size;
+		colt->col_arr[i].data = realloc(colt->col_arr[i].data,
+			new_row_count * prop_size);
+		glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[i].opengl_buf_id);
+		glBufferData(GL_ARRAY_BUFFER, new_row_count * prop_size,
+			colt->col_arr[i].data, GL_DYNAMIC_DRAW);
+	}
+	assert(colt->col_arr[0].pti == PTI_FLAGS);
+	for (unsigned int i = colt->col_count; i < new_row_count; i++)
+	{
+		((flags_t*)colt->col_arr[0].data)[i].bit_set.exists = 0;
+	}
+	colt->row_count = new_row_count;
+}
+
+void colt_print(const colt_t* colt)
+{
+	printf("ptis:");
+	printf("[");
+	for (unsigned int i = 0; i < colt->col_count; i++)
+	{
+		pti_print(colt->col_arr[i].pti);
+		if (i != colt->col_count - 1)
+		{
+			printf(",");
+		}
+	}
+	printf("]");
+	printf(",");
+	printf("glids:");
+	printf("[");
+	for (unsigned int i = 0; i < colt->col_count; i++)
+	{
+		printf("%u", colt->col_arr[i].opengl_buf_id);
+		if (i != colt->col_count - 1)
+		{
+			printf(",");
+		}
+	}
+	printf("]");
+	printf(",");
+	printf("rowcount:%u", colt->row_count);
+}
+
+#if 0
+
 octa_t g_octa = {0};
 
 void pti_print(pti_t pti)
@@ -239,3 +324,5 @@ void octa_print(void)
 	fputs("]", stdout);
 	fputs(")", stdout);
 }
+
+#endif

@@ -22,6 +22,15 @@ size_t write(int fd, const void* buf, size_t count);
 
 int main(int argc, char** argv)
 {
+
+
+
+
+
+
+
+
+	#if 0
 	ptis_t ptis_a = {0};
 	ptis_add(&ptis_a, PTI_FLAGS);
 	ptis_add(&ptis_a, PTI_COLOR);
@@ -61,6 +70,7 @@ int main(int argc, char** argv)
 	octa_print(); fputs("\n", stdout);
 
 	//return 0;
+	#endif
 
 
 
@@ -134,12 +144,56 @@ int main(int argc, char** argv)
 	#endif
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+	printf("test\n");
+
+	ptis_t* ptis;
+	PTIS_ALLOC(ptis, PTI_FLAGS, PTI_POS);
+	ptis_print(ptis); printf("\n");
+
+	colt_t* colt = colt_alloc(ptis);
+	colt_print(colt); printf("\n");
+	colt_add_rows(colt, 4);
+	colt_print(colt); printf("\n");
+
+
+	return 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	GLuint flags_buf_id;
 	GLuint pos_buf_id;
 
 	glGenBuffers(1, &flags_buf_id);
 	glGenBuffers(1, &pos_buf_id);
 
+	#if 0
 	glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
 	glBufferData(GL_ARRAY_BUFFER,
 		4 * sizeof(flags_t),
@@ -148,6 +202,7 @@ int main(int argc, char** argv)
 	glBufferData(GL_ARRAY_BUFFER,
 		4 * sizeof(pos_t),
 		octa_get_obj_prop((oi_t){0, 0}, PTI_POS), GL_DYNAMIC_DRAW);
+	#endif
 
 	int running = 1;
 	while (running)
