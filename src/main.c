@@ -22,58 +22,6 @@ size_t write(int fd, const void* buf, size_t count);
 
 int main(int argc, char** argv)
 {
-
-
-
-
-
-
-
-
-	#if 0
-	ptis_t ptis_a = {0};
-	ptis_add(&ptis_a, PTI_FLAGS);
-	ptis_add(&ptis_a, PTI_COLOR);
-	ptis_add(&ptis_a, PTI_POS);
-	//ptis_print(&ptis_a); fputs("\n", stdout);
-	//return 0;
-
-	octa_print(); fputs("\n", stdout);
-	oi_t oi = octa_alloc_obj(&ptis_a);
-	octa_print(); fputs("\n", stdout);
-	flags_t* flags = octa_get_obj_prop(oi, PTI_FLAGS);
-	flags->bit_set.exists = 1;
-	pos_t* pos = octa_get_obj_prop(oi, PTI_POS);
-	pos->x = 0.0f;
-	pos->y = 0.0f;
-	pos->z = 0.0f;
-	octa_print(); fputs("\n", stdout);
-	oi = octa_alloc_obj(&ptis_a);
-	flags = octa_get_obj_prop(oi, PTI_FLAGS);
-	flags->bit_set.exists = 1;
-	pos = octa_get_obj_prop(oi, PTI_POS);
-	pos->x = 3.0f;
-	pos->y = 1.0f;
-	pos->z = 0.0f;
-	octa_print(); fputs("\n", stdout);
-
-	ptis_t ptis_b = {0};
-	ptis_add(&ptis_b, PTI_FLAGS);
-	ptis_add(&ptis_b, PTI_POS);
-	oi = octa_alloc_obj(&ptis_b);
-	flags = octa_get_obj_prop(oi, PTI_FLAGS);
-	flags->bit_set.exists = 1;
-	pos = octa_get_obj_prop(oi, PTI_POS);
-	pos->x = 4.0f;
-	pos->y = 4.0f;
-	pos->z = 0.0f;
-	octa_print(); fputs("\n", stdout);
-
-	//return 0;
-	#endif
-
-
-
 	int test_randon_generator = 0;
 	for (unsigned int i = 1; i < (unsigned int)argc; i++)
 	{
@@ -143,21 +91,6 @@ int main(int argc, char** argv)
 	glGenBuffers(1, &world->buf_id_visuals);
 	#endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-	printf("test\n");
-
 	ptis_t* ptis;
 	PTIS_ALLOC(ptis, PTI_FLAGS, PTI_POS);
 	ptis_print(ptis); printf("\n");
@@ -177,42 +110,26 @@ int main(int argc, char** argv)
 	pos = oi_get_prop(oi, PTI_POS);
 	*pos = (pos_t){.x = 3.0f, .y = 1.0f, .z = 0.0f};
 	colt_print(colt); printf("\n");
+	for (unsigned int i = 0; i < 17 - 2; i++)
+	{
+		oi = colt_alloc_obj(colt);
+		flags = oi_get_prop(oi, PTI_FLAGS);
+		flags->bit_set.exists = 1;
+		pos = oi_get_prop(oi, PTI_POS);
+		*pos = (pos_t){
+			.x = rg_float(g_rg, 4.5f, 6.5f),
+			.y = rg_float(g_rg, -2.0f, 2.0f),
+			.z = 0.0f
+		};
+	}
+	colt_print(colt); printf("\n");
+	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 9}, PTI_FLAGS);
+	flags->bit_set.exists = 0;
+	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 11}, PTI_FLAGS);
+	flags->bit_set.exists = 0;
+	colt_print(colt); printf("\n");
 
 	//return 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	GLuint flags_buf_id;
-	GLuint pos_buf_id;
-
-	glGenBuffers(1, &flags_buf_id);
-	glGenBuffers(1, &pos_buf_id);
-
-	#if 0
-	glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
-	glBufferData(GL_ARRAY_BUFFER,
-		4 * sizeof(flags_t),
-		octa_get_obj_prop((oi_t){0, 0}, PTI_FLAGS), GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, pos_buf_id);
-	glBufferData(GL_ARRAY_BUFFER,
-		4 * sizeof(pos_t),
-		octa_get_obj_prop((oi_t){0, 0}, PTI_POS), GL_DYNAMIC_DRAW);
-	#endif
 
 	int running = 1;
 	while (running)
@@ -312,13 +229,6 @@ int main(int argc, char** argv)
 		{
 			glEnableVertexAttribArray(i);
 		}
-		
-		#if 0
-		glBindBuffer(GL_ARRAY_BUFFER, flags_buf_id);
-		flags_col_givetoshader(0);
-		glBindBuffer(GL_ARRAY_BUFFER, pos_buf_id);
-		pos_col_givetoshader(1);
-		#endif
 
 		unsigned int col_index = 0;
 		unsigned int attrib_index = 0;
