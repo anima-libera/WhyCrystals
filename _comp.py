@@ -100,10 +100,10 @@ with open(embedded_header_path, "r") as embedded_header_file:
 	for match in re.finditer(embedded_re, embedded_header_file.read()):
 		partial_file_path = match.group(1)
 		file_path = os.path.join(src_dir_name, partial_file_path)
-		excape_mode = match.group(2)
-		escaped_content = escape_file_content(file_path, excape_mode)
+		escape_mode = match.group(2)
+		escaped_content = escape_file_content(file_path, escape_mode)
 		variable_declaration = match.group(3)
-		what = "Size in bytes" if excape_mode == "SIZE" else "Content"
+		what = "Size in bytes" if escape_mode == "SIZE" else "Content"
 		generated_c.append(f"/* {what} of \"{partial_file_path}\". */")
 		generated_c.append(f"{variable_declaration} = {escaped_content};")
 		generated_c.append("")

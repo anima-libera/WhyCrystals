@@ -105,6 +105,21 @@ oi_t colt_alloc_obj(colt_t* colt)
 	return (oi_t){.colt = colt, .row_index = first_new_index};
 }
 
+const col_t* colt_get_col(const colt_t* colt, pti_t pti)
+{
+	unsigned int col_index = UINT_MAX;
+	for (unsigned int i = 0; i < colt->col_count; i++)
+	{
+		if (colt->col_arr[i].pti == pti)
+		{
+			col_index = i;
+			break;
+		}
+	}
+	assert(col_index != UINT_MAX);
+	return &colt->col_arr[col_index];
+}
+
 void colt_print(const colt_t* colt)
 {
 	printf("ptis:");
@@ -175,17 +190,7 @@ void colt_print(const colt_t* colt)
 
 void* oi_get_prop(oi_t oi, pti_t pti)
 {
-	unsigned int col_index = UINT_MAX;
-	for (unsigned int i = 0; i < oi.colt->col_count; i++)
-	{
-		if (oi.colt->col_arr[i].pti == pti)
-		{
-			col_index = i;
-			break;
-		}
-	}
-	assert(col_index != UINT_MAX);
-	char* data = oi.colt->col_arr[col_index].data;
+	char* data = colt_get_col(oi.colt, pti)->data;
 	unsigned int prop_size = g_prop_info_table[pti].size;
 	return data + oi.row_index * prop_size;
 }

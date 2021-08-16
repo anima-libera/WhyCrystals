@@ -8,6 +8,7 @@
 #include "visuals.h"
 #endif
 #include "octa.h"
+#include "spw.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <stdlib.h>
@@ -15,6 +16,10 @@
 #include <string.h> /* strcmp */
 #include <math.h>
 #include <assert.h>
+
+#ifdef cplusplus__
+#error C compiler required
+#endif
 
 size_t write(int fd, const void* buf, size_t count);
 
@@ -58,10 +63,16 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	if (init_swp_table() != 0)
+	{
+		return -1;
+	}
+
 	int window_width, window_height;
 	SDL_GL_GetDrawableSize(g_window, &window_width, &window_height);
 	glProgramUniform2ui(g_shprog_draw_visuals, 1, window_width, window_height);
-	glProgramUniform2ui(g_shprog_draw_pos, 1, window_width, window_height);
+	//glProgramUniform2ui(g_shprog_draw_pos, 1, window_width, window_height);
+	swp_update_window_wh(window_width, window_height);
 
 	g_rg = malloc(sizeof(rg_t));
 	rg_time_seed(g_rg);
@@ -224,37 +235,7 @@ int main(int argc, char** argv)
 		glUseProgram((GLuint)0);
 		#endif
 
-		glUseProgram(g_shprog_draw_pos);
-		for (unsigned int i = 0; i < 2; i++)
-		{
-			glEnableVertexAttribArray(i);
-		}
-
-		unsigned int col_index = 0;
-		unsigned int attrib_index = 0;
-		pti_t pti = colt->col_arr[col_index].pti;
-		glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[col_index].opengl_buf_id);
-		glBufferSubData(GL_ARRAY_BUFFER, 0,
-			colt->row_count * g_prop_info_table[pti].size,
-			colt->col_arr[col_index].data);
-		g_prop_info_table[pti].col_givetoshader_callback(attrib_index);
-		
-		col_index = 1;
-		attrib_index = 1;
-		pti = colt->col_arr[col_index].pti;
-		glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[col_index].opengl_buf_id);
-		glBufferSubData(GL_ARRAY_BUFFER, 0,
-			colt->row_count * g_prop_info_table[pti].size,
-			colt->col_arr[col_index].data);
-		g_prop_info_table[pti].col_givetoshader_callback(attrib_index);
-
-		glDrawArrays(GL_POINTS, 0, colt->row_count);
-
-		for (unsigned int i = 0; i < 2; i++)
-		{
-			glDisableVertexAttribArray(i);
-		}
-		glUseProgram((GLuint)0);
+		swp_apply_on_colt(SPW_ID_POS, colt);
 
 		SDL_GL_SwapWindow(g_window);
 	}

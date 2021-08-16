@@ -104,6 +104,7 @@ typedef struct oi_t oi_t;
 colt_t* colt_alloc(const ptis_t* ptis);
 void colt_add_rows(colt_t* colt, unsigned int how_much);
 oi_t colt_alloc_obj(colt_t* colt);
+const col_t* colt_get_col(const colt_t* colt, pti_t pti);
 void colt_print(const colt_t* colt);
 
 struct octa_t
