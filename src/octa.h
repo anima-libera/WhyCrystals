@@ -1,4 +1,6 @@
 
+/* OCTA - Object Container Table Array */
+
 #ifndef WHYCRYSTALS_HEADER_OCTA__
 #define WHYCRYSTALS_HEADER_OCTA__
 

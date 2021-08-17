@@ -36,7 +36,7 @@ void main()
 	gl_Position.x += 0.0;
 	gl_Position.y += +0.5;
 	gl_Position.y += pos_xyz.z;
-	gl_Position.z = gl_Position.y * depth_factor;
+	gl_Position.z = -1.0;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
@@ -45,7 +45,7 @@ void main()
 	gl_Position.x += 0.0;
 	gl_Position.y += -0.5;
 	gl_Position.y += pos_xyz.z;
-	gl_Position.z = gl_Position.y * depth_factor;
+	gl_Position.z = -1.0;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
@@ -54,7 +54,7 @@ void main()
 	gl_Position.x += 0.0;
 	gl_Position.y += 0.0;
 	gl_Position.y += pos_xyz.z;
-	gl_Position.z = gl_Position.y * depth_factor;
+	gl_Position.z = -1.0;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
@@ -63,7 +63,7 @@ void main()
 	gl_Position.x += -0.5;
 	gl_Position.y += 0.0;
 	gl_Position.y += pos_xyz.z;
-	gl_Position.z = gl_Position.y * depth_factor;
+	gl_Position.z = -1.0;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
@@ -72,7 +72,7 @@ void main()
 	gl_Position.x += +0.5;
 	gl_Position.y += 0.0;
 	gl_Position.y += pos_xyz.z;
-	gl_Position.z = gl_Position.y * depth_factor;
+	gl_Position.z = -1.0;
 	gl_Position.x *= zoom_factor / u_window_wh.x;
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();

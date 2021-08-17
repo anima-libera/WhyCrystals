@@ -7,6 +7,7 @@
 
 enum spw_uniform_whichone_t
 {
+	U_ATLAS,
 	U_WINDOW_WH,
 	UNIFORM_WHICHONE_COUNT,
 };
@@ -48,6 +49,7 @@ spw_t g_spw_table[SPW_COUNT];
 int init_swp_table(void);
 void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt);
 
+void swp_update_atlas(unsigned int texture_unit_id);
 void swp_update_window_wh(unsigned int w, unsigned int h);
 
 #endif /* WHYCRYSTALS_HEADER_SPW__ */

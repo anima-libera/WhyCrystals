@@ -9,6 +9,7 @@
 #endif
 #include "octa.h"
 #include "spw.h"
+#include "smata.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <stdlib.h>
@@ -70,12 +71,15 @@ int main(int argc, char** argv)
 
 	int window_width, window_height;
 	SDL_GL_GetDrawableSize(g_window, &window_width, &window_height);
-	//glProgramUniform2ui(g_shprog_draw_visuals, 1, window_width, window_height);
-	//glProgramUniform2ui(g_shprog_draw_pos, 1, window_width, window_height);
 	swp_update_window_wh(window_width, window_height);
 
 	g_rg = malloc(sizeof(rg_t));
 	rg_time_seed(g_rg);
+
+	if (init_smata() != 0)
+	{
+		return -1;
+	}
 
 	glEnable(GL_DEPTH_TEST);
 

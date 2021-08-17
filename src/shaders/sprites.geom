@@ -5,7 +5,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 in uint v_flags[];
 in uint v_sprite_id[];
-out vec2 g_texture_pos;
+out vec2 g_atlas_pos;
 
 #define OBJ_FLAG_EXISTS (1 << 0)
 
@@ -32,7 +32,7 @@ void main()
 	float zoom_factor = 120.0;
 	float depth_factor = 0.05;
 
-	g_texture_pos = vec2(0, 0);
+	g_atlas_pos = vec2(0, 0);
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += -0.5;
 	gl_Position.y += +0.5;
@@ -42,7 +42,7 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
-	g_texture_pos = vec2(1, 0);
+	g_atlas_pos = vec2(1, 0);
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += +0.5;
 	gl_Position.y += +0.5;
@@ -52,7 +52,7 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
-	g_texture_pos = vec2(0, 1);
+	g_atlas_pos = vec2(0, 1);
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += -0.5;
 	gl_Position.y += -0.5;
@@ -62,7 +62,7 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
-	g_texture_pos = vec2(1, 1);
+	g_atlas_pos = vec2(1, 1);
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += +0.5;
 	gl_Position.y += -0.5;

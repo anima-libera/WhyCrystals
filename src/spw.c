@@ -49,6 +49,7 @@ int init_swp_table(void)
 		unsigned int swp_id = SPW_ID_SPRITES;
 		g_spw_table[swp_id].shprog_id = g_shprog_draw_sprites;
 		SWP_DECLARE_UNIFORMS(swp_id,
+			U(U_ATLAS, 0),
 			U(U_WINDOW_WH, 1));
 		SWP_DECLARE_ATTRIBS(swp_id,
 			A(PTI_FLAGS, 0),
@@ -94,6 +95,23 @@ void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt)
 		glDisableVertexAttribArray(i);
 	}
 	glUseProgram((GLuint)0);
+}
+
+void swp_update_atlas(unsigned int texture_unit_id)
+{
+	for (unsigned int i = 0; i < SPW_COUNT; i++)
+	{
+		for (unsigned int j = 0; j < g_spw_table[i].uniform_count; j++)
+		{
+			if (g_spw_table[i].uniform_arr[j].whichone == U_ATLAS)
+			{
+				glProgramUniform1i(g_spw_table[i].shprog_id,
+					g_spw_table[i].uniform_arr[j].location,
+					texture_unit_id);
+				break;
+			}
+		}
+	}
 }
 
 void swp_update_window_wh(unsigned int w, unsigned int h)
