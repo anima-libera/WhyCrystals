@@ -4,6 +4,7 @@
 #include "octa.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 spw_t g_spw_table[SPW_COUNT];
 
@@ -35,12 +36,25 @@ int init_swp_table(void)
 				sizeof(attrib_array)); \
 		} while (0)
 
-	g_spw_table[SPW_ID_POS].shprog_id = g_shprog_draw_pos;
-	SWP_DECLARE_UNIFORMS(SPW_ID_POS,
-		U(U_WINDOW_WH, 1));
-	SWP_DECLARE_ATTRIBS(SPW_ID_POS,
-		A(PTI_FLAGS, 0),
-		A(PTI_POS, 1));
+	{
+		unsigned int swp_id = SPW_ID_POS;
+		g_spw_table[swp_id].shprog_id = g_shprog_draw_pos;
+		SWP_DECLARE_UNIFORMS(swp_id,
+			U(U_WINDOW_WH, 1));
+		SWP_DECLARE_ATTRIBS(swp_id,
+			A(PTI_FLAGS, 0),
+			A(PTI_POS, 1));
+	}
+	{
+		unsigned int swp_id = SPW_ID_SPRITES;
+		g_spw_table[swp_id].shprog_id = g_shprog_draw_sprites;
+		SWP_DECLARE_UNIFORMS(swp_id,
+			U(U_WINDOW_WH, 1));
+		SWP_DECLARE_ATTRIBS(swp_id,
+			A(PTI_FLAGS, 0),
+			A(PTI_POS, 1),
+			A(PTI_SPRITEID, 2));
+	}
 
 	#undef U
 	#undef SWP_DECLARE_UNIFORMS

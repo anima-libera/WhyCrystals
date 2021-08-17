@@ -21,8 +21,6 @@
 #error C compiler required
 #endif
 
-size_t write(int fd, const void* buf, size_t count);
-
 #define TAU 6.28318530717
 
 int main(int argc, char** argv)
@@ -42,6 +40,8 @@ int main(int argc, char** argv)
 
 	if (test_randon_generator)
 	{
+		size_t write(int fd, const void* buf, size_t count);
+
 		g_rg = malloc(sizeof(rg_t));
 		rg_time_seed(g_rg);
 		uint32_t buf32;
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
 	int window_width, window_height;
 	SDL_GL_GetDrawableSize(g_window, &window_width, &window_height);
-	glProgramUniform2ui(g_shprog_draw_visuals, 1, window_width, window_height);
+	//glProgramUniform2ui(g_shprog_draw_visuals, 1, window_width, window_height);
 	//glProgramUniform2ui(g_shprog_draw_pos, 1, window_width, window_height);
 	swp_update_window_wh(window_width, window_height);
 
@@ -103,29 +103,22 @@ int main(int argc, char** argv)
 	#endif
 
 	ptis_t* ptis;
-	PTIS_ALLOC(ptis, PTI_FLAGS, PTI_POS);
+	PTIS_ALLOC_SET(ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID);
 	ptis_print(ptis); printf("\n");
 
 	colt_t* colt = colt_alloc(ptis);
 	colt_print(colt); printf("\n");
 	oi_t oi = colt_alloc_obj(colt);
-	colt_print(colt); printf("\n");
-	flags_t* flags = oi_get_prop(oi, PTI_FLAGS);
-	flags->bit_set.exists = 1;
 	pos_t* pos = oi_get_prop(oi, PTI_POS);
 	*pos = (pos_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
 	colt_print(colt); printf("\n");
 	oi = colt_alloc_obj(colt);
-	flags = oi_get_prop(oi, PTI_FLAGS);
-	flags->bit_set.exists = 1;
 	pos = oi_get_prop(oi, PTI_POS);
 	*pos = (pos_t){.x = 3.0f, .y = 1.0f, .z = 0.0f};
 	colt_print(colt); printf("\n");
 	for (unsigned int i = 0; i < 17 - 2; i++)
 	{
 		oi = colt_alloc_obj(colt);
-		flags = oi_get_prop(oi, PTI_FLAGS);
-		flags->bit_set.exists = 1;
 		pos = oi_get_prop(oi, PTI_POS);
 		*pos = (pos_t){
 			.x = rg_float(g_rg, 4.5f, 6.5f),
@@ -134,6 +127,7 @@ int main(int argc, char** argv)
 		};
 	}
 	colt_print(colt); printf("\n");
+	flags_t* flags;
 	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 9}, PTI_FLAGS);
 	flags->bit_set.exists = 0;
 	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 11}, PTI_FLAGS);
@@ -236,6 +230,7 @@ int main(int argc, char** argv)
 		#endif
 
 		swp_apply_on_colt(SPW_ID_POS, colt);
+		swp_apply_on_colt(SPW_ID_SPRITES, colt);
 
 		SDL_GL_SwapWindow(g_window);
 	}

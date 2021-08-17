@@ -220,6 +220,7 @@ static GLuint shprog_compute_build(const char* src_comp, const char* dbg_info)
 
 GLuint g_shprog_draw_visuals = 0;
 GLuint g_shprog_draw_pos = 0;
+GLuint g_shprog_draw_sprites = 0;
 
 int shprog_build_all(void)
 {
@@ -238,6 +239,8 @@ int shprog_build_all(void)
 		g_shader_visuals_vert, g_shader_visuals_geom, g_shader_visuals_frag);
 	BUILD_SHPROG(g_shprog_draw_pos,
 		g_shader_pos_vert, g_shader_pos_geom, g_shader_pos_frag);
+	BUILD_SHPROG(g_shprog_draw_sprites,
+		g_shader_sprites_vert, g_shader_sprites_geom, g_shader_sprites_frag);
 
 	#undef BUILD_SHPROG
 
@@ -258,6 +261,7 @@ void shprog_destroy_all(void)
 
 	CLEANUP_SHPROG(g_shprog_draw_visuals);
 	CLEANUP_SHPROG(g_shprog_draw_pos);
+	CLEANUP_SHPROG(g_shprog_draw_sprites);
 
 	#undef CLEANUP_SHPROG
 }

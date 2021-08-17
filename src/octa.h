@@ -16,7 +16,7 @@ union flags_t
 	flags_bit_set_t bit_set;
 };
 typedef union flags_t flags_t;
-void flags_col_givetoshader(GLuint attrib_index);
+void flags_col_givetoshader(GLuint attrib_location);
 #define FLAGS_INFO \
 	{ \
 		.name = "flags", \
@@ -29,7 +29,7 @@ struct pos_t
 	float x, y, z;
 };
 typedef struct pos_t pos_t;
-void pos_col_givetoshader(GLuint attrib_index);
+void pos_col_givetoshader(GLuint attrib_location);
 #define POS_INFO \
 	{ \
 		.name = "pos", \
@@ -37,12 +37,25 @@ void pos_col_givetoshader(GLuint attrib_index);
 		.col_givetoshader_callback = pos_col_givetoshader, \
 	}
 
+struct spriteid_t
+{
+	unsigned int sprite_id;
+};
+typedef struct spriteid_t spriteid_t;
+void spriteid_col_givetoshader(GLuint attrib_location);
+#define SPRITEID_INFO \
+	{ \
+		.name = "spriteid", \
+		.size = sizeof(spriteid_t), \
+		.col_givetoshader_callback = spriteid_col_givetoshader, \
+	}
+
 struct color_t
 {
 	float r, g, b;
 };
 typedef struct color_t color_t;
-void color_col_givetoshader(GLuint attrib_index);
+void color_col_givetoshader(GLuint attrib_location);
 #define COLOR_INFO \
 	{ \
 		.name = "color", \
@@ -54,6 +67,7 @@ enum pti_t
 {
 	PTI_FLAGS,
 	PTI_POS,
+	PTI_SPRITEID,
 	PTI_COLOR,
 	PROP_TYPE_COUNT
 };
@@ -64,7 +78,7 @@ struct porp_info_t
 {
 	const char* name;
 	unsigned int size; /* sizeof(thing_t) */
-	void (*col_givetoshader_callback)(GLuint attrib_index);
+	void (*col_givetoshader_callback)(GLuint attrib_location);
 };
 typedef struct porp_info_t porp_info_t;
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];
@@ -75,7 +89,7 @@ struct ptis_t
 	pti_t arr[]; /* Should be sorted. */
 };
 typedef struct ptis_t ptis_t;
-#define PTIS_ALLOC(pti_ptr_, ...) \
+#define PTIS_ALLOC_SET(pti_ptr_, ...) \
 	do \
 	{ \
 		const pti_t pti_array[] = {__VA_ARGS__}; \

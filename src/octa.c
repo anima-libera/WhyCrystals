@@ -7,27 +7,34 @@
 #include <limits.h>
 #include <assert.h>
 
-void flags_col_givetoshader(GLuint attrib_index)
+void flags_col_givetoshader(GLuint attrib_location)
 {
-	glVertexAttribIPointer(attrib_index, 1, GL_UNSIGNED_INT,
+	glVertexAttribIPointer(attrib_location, 1, GL_UNSIGNED_INT,
 		sizeof(flags_t), (void*)offsetof(flags_t, plain));
 }
 
-void pos_col_givetoshader(GLuint attrib_index)
+void pos_col_givetoshader(GLuint attrib_location)
 {
-	glVertexAttribPointer(attrib_index, 3, GL_FLOAT, GL_FALSE,
+	glVertexAttribPointer(attrib_location, 3, GL_FLOAT, GL_FALSE,
 		sizeof(pos_t), (void*)offsetof(pos_t, x));
 }
 
-void color_col_givetoshader(GLuint attrib_index)
+void spriteid_col_givetoshader(GLuint attrib_location)
 {
-	glVertexAttribPointer(attrib_index, 3, GL_FLOAT, GL_FALSE,
+	glVertexAttribIPointer(attrib_location, 1, GL_UNSIGNED_INT,
+		sizeof(spriteid_t), (void*)offsetof(spriteid_t, sprite_id));
+}
+
+void color_col_givetoshader(GLuint attrib_location)
+{
+	glVertexAttribPointer(attrib_location, 3, GL_FLOAT, GL_FALSE,
 		sizeof(color_t), (void*)offsetof(color_t, r));
 }
 
 const porp_info_t g_prop_info_table[PROP_TYPE_COUNT] = {
 	[PTI_FLAGS] = FLAGS_INFO,
 	[PTI_POS] = POS_INFO,
+	[PTI_SPRITEID] = SPRITEID_INFO,
 	[PTI_COLOR] = COLOR_INFO,
 };
 
@@ -65,6 +72,20 @@ colt_t* colt_alloc(const ptis_t* ptis)
 	return colt;
 }
 
+static void colt_set_row_used_flag(const colt_t* colt, unsigned int row_index,
+	int flag)
+{
+	assert(colt->col_arr[0].pti == PTI_FLAGS);
+	assert(flag == 0 || flag == 1);
+	((flags_t*)colt->col_arr[0].data)[row_index].bit_set.exists = flag;
+}
+
+static int colt_is_row_used(const colt_t* colt, unsigned int row_index)
+{
+	assert(colt->col_arr[0].pti == PTI_FLAGS);
+	return ((flags_t*)colt->col_arr[0].data)[row_index].bit_set.exists;
+}
+
 void colt_add_rows(colt_t* colt, unsigned int how_much)
 {
 	unsigned int new_row_count = colt->row_count + how_much;
@@ -80,15 +101,9 @@ void colt_add_rows(colt_t* colt, unsigned int how_much)
 	assert(colt->col_arr[0].pti == PTI_FLAGS);
 	for (unsigned int i = colt->row_count; i < new_row_count; i++)
 	{
-		((flags_t*)colt->col_arr[0].data)[i].bit_set.exists = 0;
+		colt_set_row_used_flag(colt, i, 0);
 	}
 	colt->row_count = new_row_count;
-}
-
-static int colt_is_row_used(const colt_t* colt, unsigned int row_index)
-{
-	assert(colt->col_arr[0].pti == PTI_FLAGS);
-	return ((flags_t*)colt->col_arr[0].data)[row_index].bit_set.exists;
 }
 
 oi_t colt_alloc_obj(colt_t* colt)
@@ -97,11 +112,13 @@ oi_t colt_alloc_obj(colt_t* colt)
 	{
 		if (!colt_is_row_used(colt, i))
 		{
+			colt_set_row_used_flag(colt, i, 1);
 			return (oi_t){.colt = colt, .row_index = i};
 		}
 	}
 	unsigned int first_new_index = colt->row_count;
 	colt_add_rows(colt, colt->row_count / 2 + 4);
+	colt_set_row_used_flag(colt, first_new_index, 1);
 	return (oi_t){.colt = colt, .row_index = first_new_index};
 }
 

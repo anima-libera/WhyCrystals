@@ -28,4 +28,8 @@ EMBEDDED("shaders/pos.vert", TEXT) const char g_shader_pos_vert[];
 EMBEDDED("shaders/pos.geom", TEXT) const char g_shader_pos_geom[];
 EMBEDDED("shaders/pos.frag", TEXT) const char g_shader_pos_frag[];
 
+EMBEDDED("shaders/sprites.vert", TEXT) const char g_shader_sprites_vert[];
+EMBEDDED("shaders/sprites.geom", TEXT) const char g_shader_sprites_geom[];
+EMBEDDED("shaders/sprites.frag", TEXT) const char g_shader_sprites_frag[];
+
 #endif /* WHYCRYSTALS_HEADER_EMBEDDED__ */
