@@ -14,7 +14,7 @@
 #include <GL/glew.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h> /* strcmp */
+#include <string.h> /* strcmp, memset */
 #include <math.h>
 #include <assert.h>
 
@@ -58,6 +58,7 @@ int main(int argc, char** argv)
 	{
 		return -1;
 	}
+	glEnable(GL_DEPTH_TEST);
 
 	if (shprog_build_all() != 0)
 	{
@@ -81,7 +82,63 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	glEnable(GL_DEPTH_TEST);
+	canvas_t canvas;
+	canvas.w = 50;
+	canvas.h = 50;
+	canvas.data = calloc(canvas.w * canvas.h, sizeof(pixel_t));
+
+	canvas.incanvas_sprite_rect.x = 0;
+	canvas.incanvas_sprite_rect.y = 0;
+	canvas.incanvas_sprite_rect.w = 8;
+	canvas.incanvas_sprite_rect.h = 8;
+	canvas.incanvas_sprite_rect.origin_x = 0.5f;
+	canvas.incanvas_sprite_rect.origin_y = 0.5f;
+
+	for (unsigned int x = 0; x < canvas.incanvas_sprite_rect.w; x++)
+	for (unsigned int y = 0; y < canvas.incanvas_sprite_rect.h; y++)
+	{
+		canvas.data[x + canvas.w * y] = (pixel_t){
+			.r = rg_int(g_rg, 100, 255),
+			.g = rg_int(g_rg, 0, 255),
+			.b = rg_int(g_rg, 0, 100),
+			.a = 255
+		};
+	}
+
+	unsigned int sprite_id_test01 = smata_register_sprite(&canvas);
+
+	memset(canvas.data, 0, canvas.w * canvas.h * sizeof(pixel_t));
+
+	canvas.incanvas_sprite_rect.x = 0;
+	canvas.incanvas_sprite_rect.y = 0;
+	canvas.incanvas_sprite_rect.w = 5;
+	canvas.incanvas_sprite_rect.h = 10;
+	canvas.incanvas_sprite_rect.origin_x = 0.5f;
+	canvas.incanvas_sprite_rect.origin_y = 0.0f;
+
+	unsigned int w = canvas.incanvas_sprite_rect.w;
+	unsigned int h = canvas.incanvas_sprite_rect.h;
+	for (unsigned int y = h/2; y < h; y++)
+	{
+		canvas.data[w/2 + canvas.w * y] = (pixel_t){
+			.r = 100,
+			.g = 40,
+			.b = 0,
+			.a = 255
+		};
+	}
+	for (unsigned int x = 0; x < w; x++)
+	for (unsigned int y = 0; y < h/2; y++)
+	{
+		canvas.data[x + canvas.w * y] = (pixel_t){
+			.r = 100,
+			.g = 200,
+			.b = 50,
+			.a = 255
+		};
+	}
+
+	unsigned int sprite_id_test02 = smata_register_sprite(&canvas);
 
 	#if 0
 	generate_texture_map();
@@ -110,16 +167,27 @@ int main(int argc, char** argv)
 	PTIS_ALLOC_SET(ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID);
 	ptis_print(ptis); printf("\n");
 
+	oi_t oi;
+	pos_t* pos;
+	spriteid_t* spriteid;
+
 	colt_t* colt = colt_alloc(ptis);
 	colt_print(colt); printf("\n");
-	oi_t oi = colt_alloc_obj(colt);
-	pos_t* pos = oi_get_prop(oi, PTI_POS);
+
+	oi = colt_alloc_obj(colt);
+	pos = oi_get_prop(oi, PTI_POS);
 	*pos = (pos_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
+	spriteid = oi_get_prop(oi, PTI_SPRITEID);
+	spriteid->sprite_id = sprite_id_test02;
 	colt_print(colt); printf("\n");
+
 	oi = colt_alloc_obj(colt);
 	pos = oi_get_prop(oi, PTI_POS);
 	*pos = (pos_t){.x = 3.0f, .y = 1.0f, .z = 0.0f};
+	spriteid = oi_get_prop(oi, PTI_SPRITEID);
+	spriteid->sprite_id = sprite_id_test02;
 	colt_print(colt); printf("\n");
+
 	for (unsigned int i = 0; i < 17 - 2; i++)
 	{
 		oi = colt_alloc_obj(colt);
@@ -129,8 +197,11 @@ int main(int argc, char** argv)
 			.y = rg_float(g_rg, -2.0f, 2.0f),
 			.z = 0.0f
 		};
+		spriteid = oi_get_prop(oi, PTI_SPRITEID);
+		spriteid->sprite_id = sprite_id_test02;
 	}
 	colt_print(colt); printf("\n");
+
 	flags_t* flags;
 	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 9}, PTI_FLAGS);
 	flags->bit_set.exists = 0;
@@ -234,6 +305,8 @@ int main(int argc, char** argv)
 		#endif
 
 		swp_apply_on_colt(SPW_ID_POS, colt);
+
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, g_smata.sr_buffer_opengl_id);
 		swp_apply_on_colt(SPW_ID_SPRITES, colt);
 
 		SDL_GL_SwapWindow(g_window);

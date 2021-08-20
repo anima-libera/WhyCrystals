@@ -15,9 +15,36 @@ struct pixel_t
 };
 typedef struct pixel_t pixel_t;
 
-extern pixel_t* g_smata_atlas_data;
-extern GLuint g_smata_atlas_id;
+struct sprite_rect_t
+{
+	unsigned int x, y, w, h;
+	float origin_x, origin_y; /* In the rect, 0 and 1 are the rect edges. */
+};
+typedef struct sprite_rect_t sprite_rect_t;
 
+struct smata_t
+{
+	#define ATLAS_SIDE 1024 /* TODO: runtime get GL_MAX_TEXTURE_SIZE */
+	pixel_t* atlas_data;
+	GLuint atlas_id;
+	unsigned int sr_len;
+	unsigned int sr_cap;
+	sprite_rect_t* sr_arr;
+	GLuint sr_buffer_opengl_id;
+};
+typedef struct smata_t smata_t;
+extern smata_t g_smata;
 int init_smata(void);
+
+/* Canvas are used to draw sprites one at a time and register them to smata. */
+struct canvas_t
+{
+	unsigned int w, h;
+	pixel_t* data;
+	sprite_rect_t incanvas_sprite_rect;
+};
+typedef struct canvas_t canvas_t;
+
+unsigned int smata_register_sprite(canvas_t* canvas);
 
 #endif /* WHYCRYSTALS_HEADER_SMATA__ */

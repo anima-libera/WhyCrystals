@@ -32,6 +32,9 @@ void main()
 	float zoom_factor = 120.0;
 	float depth_factor = 0.05;
 
+	/*   @   *
+	 * . . . *
+	 *   .   */
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += 0.0;
 	gl_Position.y += +0.5;
@@ -41,6 +44,9 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
+	/*   .   *
+	 * . . . *
+	 *   @   */
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += 0.0;
 	gl_Position.y += -0.5;
@@ -50,6 +56,9 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
+	/*   .   *
+	 * . @ . *
+	 *   .   */
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += 0.0;
 	gl_Position.y += 0.0;
@@ -59,6 +68,9 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
+	/*   .   *
+	 * @ . . *
+	 *   .   */
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += -0.5;
 	gl_Position.y += 0.0;
@@ -68,6 +80,9 @@ void main()
 	gl_Position.y *= zoom_factor / u_window_wh.y;
 	EmitVertex();
 
+	/*   .   *
+	 * . . @ *
+	 *   .   */
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.x += +0.5;
 	gl_Position.y += 0.0;

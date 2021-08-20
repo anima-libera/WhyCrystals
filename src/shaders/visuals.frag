@@ -7,7 +7,7 @@ out vec4 out_color;
 void main()
 {
 	out_color = vec4(texture(u_tileset_texture, g_texture_pos));
-	if (out_color.a < 0.01)
+	if (out_color.a < 0.001)
 	{
 		discard;
 	}
