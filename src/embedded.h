@@ -20,10 +20,6 @@
 #define BINARY /* Escapes the file content as an array of bytes. */
 #define SIZE /* Just produces an integer literal of the size in bytes. */
 
-EMBEDDED("shaders/visuals.vert", TEXT) const char g_shader_visuals_vert[];
-EMBEDDED("shaders/visuals.geom", TEXT) const char g_shader_visuals_geom[];
-EMBEDDED("shaders/visuals.frag", TEXT) const char g_shader_visuals_frag[];
-
 EMBEDDED("shaders/pos.vert", TEXT) const char g_shader_pos_vert[];
 EMBEDDED("shaders/pos.geom", TEXT) const char g_shader_pos_geom[];
 EMBEDDED("shaders/pos.frag", TEXT) const char g_shader_pos_frag[];

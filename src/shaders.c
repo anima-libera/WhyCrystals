@@ -7,7 +7,7 @@
 /* Parameters akin to dbg_... can be NULL, but should actually provide
  * information that describes the shader type and/or shader source/sources
  * that end up given to glShaderSource when creating a shader or a shader
- * program (like a file path or a variable name) for the error message to be
+ * program (such as a file path or a variable name) for the error message to be
  * more helpful, if any. */
 
 /* Creates an OpenGL shader object with the given GLSL source code, then
@@ -218,7 +218,6 @@ static GLuint shprog_compute_build(const char* src_comp, const char* dbg_info)
 }
 #endif
 
-GLuint g_shprog_draw_visuals = 0;
 GLuint g_shprog_draw_pos = 0;
 GLuint g_shprog_draw_sprites = 0;
 
@@ -235,8 +234,6 @@ int shprog_build_all(void)
 			} \
 		} while (0)
 
-	BUILD_SHPROG(g_shprog_draw_visuals,
-		g_shader_visuals_vert, g_shader_visuals_geom, g_shader_visuals_frag);
 	BUILD_SHPROG(g_shprog_draw_pos,
 		g_shader_pos_vert, g_shader_pos_geom, g_shader_pos_frag);
 	BUILD_SHPROG(g_shprog_draw_sprites,
@@ -259,7 +256,6 @@ void shprog_destroy_all(void)
 			} \
 		} while (0)
 
-	CLEANUP_SHPROG(g_shprog_draw_visuals);
 	CLEANUP_SHPROG(g_shprog_draw_pos);
 	CLEANUP_SHPROG(g_shprog_draw_sprites);
 
