@@ -1,13 +1,22 @@
 
-/* OCTA - Object Container Table Array */
+/* OCTA - Object Container Table Array
+ * Implementations are in "octa.c". */
 
 #ifndef WHYCRYSTALS_HEADER_OCTA__
 #define WHYCRYSTALS_HEADER_OCTA__
 
 #include <GL/glew.h>
 
+/* Octa was insipered by the concept of archetypal ECS.
+ * TODO: Explain all this, and make a drawing of the memory layout. */
+
+/* Flags property, which all objects must have (due to the design of Octa). */
 struct flags_bit_set_t
 {
+	/* The exists flag is used by Octa at a fundamental level:
+	 * A value of 0 means that the object that has it doesn't exist and the
+	 * row it is in is free to be allocated for a new object.
+	 * This flag should only be managed by the internals of Octa. */
 	unsigned int exists: 1;
 	#define OBJ_FLAG_EXISTS (1 << 0)
 };
@@ -26,8 +35,10 @@ void flags_col_givetoshader(GLuint attrib_location);
 		.col_givetoshader_callback = flags_col_givetoshader, \
 	}
 
+/* Position property. */
 struct pos_t
 {
+	/* The z-axis is the down-up axis. */
 	float x, y, z;
 };
 typedef struct pos_t pos_t;
@@ -39,8 +50,10 @@ void pos_col_givetoshader(GLuint attrib_location);
 		.col_givetoshader_callback = pos_col_givetoshader, \
 	}
 
+/* Sprite id property. */
 struct spriteid_t
 {
+	/* The id of a sprite managed by Smata, see Smata for more. */
 	unsigned int sprite_id;
 };
 typedef struct spriteid_t spriteid_t;
@@ -52,8 +65,10 @@ void spriteid_col_givetoshader(GLuint attrib_location);
 		.col_givetoshader_callback = spriteid_col_givetoshader, \
 	}
 
+/* Scale property. */
 struct scale_t
 {
+	/* TODO: Document. */
 	float scale;
 };
 typedef struct scale_t scale_t;
@@ -65,6 +80,7 @@ void scale_col_givetoshader(GLuint attrib_location);
 		.col_givetoshader_callback = scale_col_givetoshader, \
 	}
 
+/* TODO: Delete this test property. */
 struct color_t
 {
 	float r, g, b;
@@ -78,6 +94,7 @@ void color_col_givetoshader(GLuint attrib_location);
 		.col_givetoshader_callback = color_col_givetoshader, \
 	}
 
+/* Property type id. */
 enum pti_t
 {
 	PTI_FLAGS,
@@ -90,6 +107,7 @@ enum pti_t
 typedef enum pti_t pti_t;
 void pti_print(pti_t pti);
 
+/* Informations about a property type that can be accessed at runtime. */
 struct porp_info_t
 {
 	const char* name;
@@ -99,6 +117,7 @@ struct porp_info_t
 typedef struct porp_info_t porp_info_t;
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];
 
+/* Property type id set. */
 struct ptis_t
 {
 	unsigned int len;
@@ -115,6 +134,7 @@ typedef struct ptis_t ptis_t;
 	} while (0)
 void ptis_print(const ptis_t* ptis);
 
+/* Column. */
 struct col_t
 {
 	pti_t pti;
@@ -123,6 +143,7 @@ struct col_t
 };
 typedef struct col_t col_t;
 
+/* Column table. */
 struct colt_t
 {
 	unsigned int col_count;
@@ -137,6 +158,7 @@ oi_t colt_alloc_obj(colt_t* colt);
 const col_t* colt_get_col(const colt_t* colt, pti_t pti);
 void colt_print(const colt_t* colt);
 
+/* Octa, the array of tables. */
 struct octa_t
 {
 	unsigned int len;
@@ -145,6 +167,7 @@ struct octa_t
 typedef struct octa_t octa_t;
 extern octa_t g_octa;
 
+/* Object index. */
 struct oi_t
 {
 	colt_t* colt;

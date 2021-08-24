@@ -24,8 +24,8 @@ EMBEDDED("shaders/pos.vert", TEXT) const char g_shader_pos_vert[];
 EMBEDDED("shaders/pos.geom", TEXT) const char g_shader_pos_geom[];
 EMBEDDED("shaders/pos.frag", TEXT) const char g_shader_pos_frag[];
 
-EMBEDDED("shaders/sprites.vert", TEXT) const char g_shader_sprites_vert[];
-EMBEDDED("shaders/sprites.geom", TEXT) const char g_shader_sprites_geom[];
-EMBEDDED("shaders/sprites.frag", TEXT) const char g_shader_sprites_frag[];
+EMBEDDED("shaders/sprite.vert", TEXT) const char g_shader_sprite_vert[];
+EMBEDDED("shaders/sprite.geom", TEXT) const char g_shader_sprite_geom[];
+EMBEDDED("shaders/sprite.frag", TEXT) const char g_shader_sprite_frag[];
 
 #endif /* WHYCRYSTALS_HEADER_EMBEDDED__ */

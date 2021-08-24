@@ -90,6 +90,12 @@ static void GLAPIENTRY opengl_dbgmsg_callback(
 	#ifndef DEBUG
 		/* Filter out non-error debug messages if not in a debug build. */
 		if (type != GL_DEBUG_TYPE_ERROR) return;
+		/* Note: The printing of non-error debug messages will looks like
+		 * > OpenGL dbgmsg (NOTIFICATION severity) API:OTHER(131185)
+		 * > "Buffer detailed info: Buffer object 5
+		 * > (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_DYNAMIC_DRAW)
+		 * > will use VIDEO memory as the source for buffer object operations."
+		 * (or at least it looks like that on my machine). */
 	#endif
 	fprintf((type == GL_DEBUG_TYPE_ERROR) ? stderr : stdout,
 		"OpenGL dbgmsg (%s severity) %s:%s(%u) %s\"%s\"\x1b[39m\n",

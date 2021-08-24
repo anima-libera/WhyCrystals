@@ -61,8 +61,8 @@ int init_swp_table(void)
 			A(PTI_POS, 1));
 	}
 	{
-		unsigned int swp_id = SPW_ID_SPRITES;
-		g_spw_table[swp_id].shprog_id = g_shprog_draw_sprites;
+		unsigned int swp_id = SPW_ID_SPRITE;
+		g_spw_table[swp_id].shprog_id = g_shprog_draw_sprite;
 		SWP_DECLARE_UNIFORMS(swp_id,
 			U(U_ATLAS, 0),
 			U(U_WINDOW_WH, 1));

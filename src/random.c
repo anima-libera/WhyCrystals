@@ -68,8 +68,6 @@ void rg_time_seed(rg_t* rg)
 	rg_seed(rg, time(NULL));
 }
 
-rg_t* g_rg = NULL;
-
 int rg_int(rg_t* rg, int inf, int sup)
 {
 	return inf + (int)(rg_step(rg) % (sup - inf + 1));

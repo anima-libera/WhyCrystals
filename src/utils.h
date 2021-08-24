@@ -7,6 +7,19 @@
 
 unsigned int umax(unsigned int a, unsigned int b);
 
+/* Dynamic array reallocator.
+ * There is no need for such things as templates or high-level features,
+ * because C has genericity support (proof here).
+ * To use this macro for a dynamic array such as
+ *  struct {
+ *   unsigned int len;
+ *   unsigned int cap;
+ *   type_contained_t* arr;
+ *  } da = {0};
+ * then the indented invocation (for, say, add one cell) should be
+ *  DA_LENGTHEN(da.len += 1, da.cap, da.arr, type_contained_t);
+ * and new cells (in this case, one new cell) will be allocated at the end
+ * of the array, and filled with garbage values (beware!). */
 #define DA_LENGTHEN(len_expr_, cap_, arr_ptr_, elem_type_) \
 	do \
 	{ \

@@ -10,16 +10,12 @@
 /* Random generator state. */
 struct rg_t
 {
-	uint32_t seed; /* Not actually used. */
-	#define RG_SIZE 41
+	uint32_t seed; /* Will not be changed by using the generator. */
+	#define RG_SIZE 41 /* Arbitrary choise with no thoughts behind it. */
 	uint32_t lcg_array[RG_SIZE];
-	int cur;
+	int cur; /* Index of the next LCG to be used. */
 };
 typedef struct rg_t rg_t;
-
-/* The global random generator.
- * TODO: Remove it ? */
-extern rg_t* g_rg;
 
 /* Initialises the given rg with the given seed. */
 void rg_seed(rg_t* rg, uint32_t seed);

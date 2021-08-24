@@ -1,4 +1,7 @@
 
+/* Shader program wrappers for an easy handling of shaders.
+ * Implementations are in "spw.c". */
+
 #ifndef WHYCRYSTALS_HEADER_SPW__
 #define WHYCRYSTALS_HEADER_SPW__
 
@@ -57,7 +60,7 @@ typedef struct spw_t spw_t;
 enum spw_id_t
 {
 	SPW_ID_POS,
-	SPW_ID_SPRITES,
+	SPW_ID_SPRITE,
 	SPW_COUNT
 };
 typedef enum spw_id_t spw_id_t;
