@@ -52,6 +52,19 @@ void spriteid_col_givetoshader(GLuint attrib_location);
 		.col_givetoshader_callback = spriteid_col_givetoshader, \
 	}
 
+struct scale_t
+{
+	float scale;
+};
+typedef struct scale_t scale_t;
+void scale_col_givetoshader(GLuint attrib_location);
+#define SCALE_INFO \
+	{ \
+		.name = "scale", \
+		.size = sizeof(scale_t), \
+		.col_givetoshader_callback = scale_col_givetoshader, \
+	}
+
 struct color_t
 {
 	float r, g, b;
@@ -70,6 +83,7 @@ enum pti_t
 	PTI_FLAGS,
 	PTI_POS,
 	PTI_SPRITEID,
+	PTI_SCALE,
 	PTI_COLOR,
 	PROP_TYPE_COUNT
 };

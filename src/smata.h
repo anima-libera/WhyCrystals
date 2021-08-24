@@ -15,10 +15,23 @@ struct pixel_t
 };
 typedef struct pixel_t pixel_t;
 
+struct sprite_flags_bit_set_t
+{
+	unsigned int vertical: 1;
+};
+typedef struct sprite_flags_bit_set_t sprite_flags_bit_set_t;
+union sprite_flags_t
+{
+	unsigned int plain;
+	sprite_flags_bit_set_t bit_set;
+};
+typedef union sprite_flags_t sprite_flags_t;
+
 struct sprite_rect_t
 {
 	unsigned int x, y, w, h;
 	float origin_x, origin_y; /* In the rect, 0 and 1 are the rect edges. */
+	sprite_flags_t flags;
 };
 typedef struct sprite_rect_t sprite_rect_t;
 

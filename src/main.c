@@ -2,11 +2,6 @@
 #include "window.h"
 #include "shaders.h"
 #include "random.h"
-#if 0
-#include "da.h"
-#include "world.h"
-#include "visuals.h"
-#endif
 #include "octa.h"
 #include "spw.h"
 #include "smata.h"
@@ -93,6 +88,7 @@ int main(int argc, char** argv)
 	canvas.incanvas_sprite_rect.h = 8;
 	canvas.incanvas_sprite_rect.origin_x = 0.5f;
 	canvas.incanvas_sprite_rect.origin_y = 0.5f;
+	canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
 
 	for (unsigned int x = 0; x < canvas.incanvas_sprite_rect.w; x++)
 	for (unsigned int y = 0; y < canvas.incanvas_sprite_rect.h; y++)
@@ -115,6 +111,7 @@ int main(int argc, char** argv)
 	canvas.incanvas_sprite_rect.h = 10;
 	canvas.incanvas_sprite_rect.origin_x = 0.5f;
 	canvas.incanvas_sprite_rect.origin_y = 0.0f;
+	canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
 
 	unsigned int w = canvas.incanvas_sprite_rect.w;
 	unsigned int h = canvas.incanvas_sprite_rect.h;
@@ -164,12 +161,13 @@ int main(int argc, char** argv)
 	#endif
 
 	ptis_t* ptis;
-	PTIS_ALLOC_SET(ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID);
+	PTIS_ALLOC_SET(ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
 	ptis_print(ptis); printf("\n");
 
 	oi_t oi;
 	pos_t* pos;
 	spriteid_t* spriteid;
+	scale_t* scale;
 
 	colt_t* colt = colt_alloc(ptis);
 	colt_print(colt); printf("\n");
@@ -179,6 +177,8 @@ int main(int argc, char** argv)
 	*pos = (pos_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
 	spriteid = oi_get_prop(oi, PTI_SPRITEID);
 	spriteid->sprite_id = sprite_id_test02;
+	scale = oi_get_prop(oi, PTI_SCALE);
+	scale->scale = 1.0f;
 	colt_print(colt); printf("\n");
 
 	oi = colt_alloc_obj(colt);
@@ -186,6 +186,8 @@ int main(int argc, char** argv)
 	*pos = (pos_t){.x = 3.0f, .y = 1.0f, .z = 0.0f};
 	spriteid = oi_get_prop(oi, PTI_SPRITEID);
 	spriteid->sprite_id = sprite_id_test02;
+	scale = oi_get_prop(oi, PTI_SCALE);
+	scale->scale = 2.0f;
 	colt_print(colt); printf("\n");
 
 	for (unsigned int i = 0; i < 17 - 2; i++)
@@ -199,6 +201,8 @@ int main(int argc, char** argv)
 		};
 		spriteid = oi_get_prop(oi, PTI_SPRITEID);
 		spriteid->sprite_id = sprite_id_test02;
+		scale = oi_get_prop(oi, PTI_SCALE);
+		scale->scale = 1.0f;
 	}
 	colt_print(colt); printf("\n");
 
@@ -304,9 +308,7 @@ int main(int argc, char** argv)
 		glUseProgram((GLuint)0);
 		#endif
 
-		swp_apply_on_colt(SPW_ID_POS, colt);
-
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, g_smata.sr_buffer_opengl_id);
+		//swp_apply_on_colt(SPW_ID_POS, colt);
 		swp_apply_on_colt(SPW_ID_SPRITES, colt);
 
 		SDL_GL_SwapWindow(g_window);

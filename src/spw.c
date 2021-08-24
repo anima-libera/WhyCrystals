@@ -2,11 +2,13 @@
 #include "spw.h"
 #include "shaders.h"
 #include "octa.h"
+#include "smata.h"
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <stdio.h>
 
-spw_t g_spw_table[SPW_COUNT];
+spw_t g_spw_table[SPW_COUNT] = {0};
 
 int init_swp_table(void)
 {
@@ -21,6 +23,19 @@ int init_swp_table(void)
 				sizeof(uniform_array) / sizeof(spw_uniform_t); \
 			memcpy(g_spw_table[index_].uniform_arr, uniform_array, \
 				sizeof(uniform_array)); \
+		} while (0)
+
+	#define B(whichone_, binding_) \
+		((spw_buffer_t){.whichone = whichone_, .binding = binding_})
+	#define SWP_DECLARE_BUFFERS(index_, ...) \
+		do \
+		{ \
+			const spw_buffer_t buffer_array[] = {__VA_ARGS__}; \
+			g_spw_table[index_].buffer_arr = malloc(sizeof(buffer_array)); \
+			g_spw_table[index_].buffer_count = \
+				sizeof(buffer_array) / sizeof(spw_buffer_t); \
+			memcpy(g_spw_table[index_].buffer_arr, buffer_array, \
+				sizeof(buffer_array)); \
 		} while (0)
 
 	#define A(pti_, location_) \
@@ -51,29 +66,44 @@ int init_swp_table(void)
 		SWP_DECLARE_UNIFORMS(swp_id,
 			U(U_ATLAS, 0),
 			U(U_WINDOW_WH, 1));
+		SWP_DECLARE_BUFFERS(swp_id,
+			B(B_SMATA_SPRITE_RECTS, 0));
 		SWP_DECLARE_ATTRIBS(swp_id,
 			A(PTI_FLAGS, 0),
 			A(PTI_POS, 1),
-			A(PTI_SPRITEID, 2));
+			A(PTI_SPRITEID, 2),
+			A(PTI_SCALE, 3));
 	}
 
 	#undef U
 	#undef SWP_DECLARE_UNIFORMS
-
+	#undef B
+	#undef SWP_DECLARE_BUFFERS
 	#undef A
 	#undef SWP_DECLARE_ATTRIBS
 
 	return 0;
 }
 
+static GLuint get_buffer_openglid(spw_buffer_whichone_t whichone)
+{
+	switch (whichone)
+	{
+		case B_SMATA_SPRITE_RECTS:
+			return g_smata.sr_buffer_opengl_id;
+		default:
+			assert(0);
+	}
+}
+
 void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt)
 {
 	glUseProgram(g_spw_table[spw_id].shprog_id);
+
 	for (unsigned int i = 0; i < g_spw_table[spw_id].attrib_count; i++)
 	{
 		glEnableVertexAttribArray(i);
 	}
-
 	for (unsigned int i = 0; i < g_spw_table[spw_id].attrib_count; i++)
 	{
 		pti_t pti = g_spw_table[spw_id].attrib_arr[i].pti;
@@ -88,12 +118,20 @@ void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt)
 		g_prop_info_table[pti].col_givetoshader_callback(location);
 	}
 
+	for (unsigned int i = 0; i < g_spw_table[spw_id].buffer_count; i++)
+	{
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
+			g_spw_table[spw_id].buffer_arr[i].binding,
+			get_buffer_openglid(g_spw_table[spw_id].buffer_arr[i].whichone));
+	}
+
 	glDrawArrays(GL_POINTS, 0, colt->row_count);
 
 	for (unsigned int i = 0; i < g_spw_table[spw_id].attrib_count; i++)
 	{
 		glDisableVertexAttribArray(i);
 	}
+
 	glUseProgram((GLuint)0);
 }
 
