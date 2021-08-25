@@ -54,9 +54,12 @@ void main()
 	float zoom_factor = 120.0;
 	float depth_factor = 0.05;
 
+	float sr_margin = 0.1 / float(ATLAS_SIDE);
+
 	/* @ . *
 	 * . . */
 	g_atlas_pos = sr_xy + vec2(sr_wh.x * 0, sr_wh.y * 1);
+	g_atlas_pos += vec2(+1, -1) * sr_margin;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy +=
 		vec2((0.0-sr_origin.x) * wh.x, (0.0-sr_origin.y) * wh.y) * scale;
@@ -73,6 +76,7 @@ void main()
 	/* . @ *
 	 * . . */
 	g_atlas_pos = sr_xy + vec2(sr_wh.x * 1, sr_wh.y * 1);
+	g_atlas_pos += vec2(-1, -1) * sr_margin;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy +=
 		vec2((1.0-sr_origin.x) * wh.x, (0.0-sr_origin.y) * wh.y) * scale;
@@ -89,6 +93,7 @@ void main()
 	/* . . *
 	 * @ . */
 	g_atlas_pos = sr_xy + vec2(sr_wh.x * 0, sr_wh.y * 0);
+	g_atlas_pos += vec2(+1, +1) * sr_margin;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy +=
 		vec2((0.0-sr_origin.x) * wh.x, (1.0-sr_origin.y) * wh.y) * scale;
@@ -101,6 +106,7 @@ void main()
 	/* . . *
 	 * . @ */
 	g_atlas_pos = sr_xy + vec2(sr_wh.x * 1, sr_wh.y * 0);
+	g_atlas_pos += vec2(-1, +1) * sr_margin;
 	gl_Position = vec4(pos_xyz.xy, 0, 1);
 	gl_Position.xy +=
 		vec2((1.0-sr_origin.x) * wh.x, (1.0-sr_origin.y) * wh.y) * scale;

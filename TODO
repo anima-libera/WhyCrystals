@@ -1,5 +1,6 @@
 
-- Fuse the property "spriteid" and "scale"
+- Fuse the property "spriteid" and "scale", or not, but think about it
+- Add a flag on sprite ids or something to mirror the sprite along the y axis
 - Make a property know whether it is OpenGL-buffer-izable or not
 - Make a command line based debugging interface
 - Document headers
@@ -29,6 +30,9 @@
 
 - Add particles
 - Add sounds
+- Add UI rendering
+- Add text rendering
+- Make the world view angle rotatable (like in the last maae attempt)
 
 - Fix all the leaks
 - Use glBufferSubData instead of glBufferData when possible

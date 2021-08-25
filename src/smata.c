@@ -13,17 +13,6 @@ int init_smata(void)
 {
 	g_smata.atlas_data = calloc(ATLAS_SIDE * ATLAS_SIDE, sizeof(pixel_t));
 
-	#if 0
-	for (unsigned int x = 0; x < ATLAS_SIDE; x++)
-	for (unsigned int y = 0; y < ATLAS_SIDE; y++)
-	{
-		g_smata.atlas_data[x + ATLAS_SIDE * y].r = x * 255 / ATLAS_SIDE;
-		g_smata.atlas_data[x + ATLAS_SIDE * y].g = y * 255 / ATLAS_SIDE;
-		g_smata.atlas_data[x + ATLAS_SIDE * y].b = 255;
-		g_smata.atlas_data[x + ATLAS_SIDE * y].a = 255;
-	}
-	#endif
-
 	glGenTextures(1, &g_smata.atlas_id);
 	glBindTexture(GL_TEXTURE_2D, g_smata.atlas_id);
 	glTexImage2D(GL_TEXTURE_2D,
@@ -67,14 +56,6 @@ unsigned int smata_register_sprite(canvas_t* canvas)
 				assert(0);
 			}
 		}
-		#if 0
-		fprintf(stderr, "(%u, %u) -> (%u, %u, %u, %u)\n",
-			x, y,
-			g_smata.atlas_data[x + ATLAS_SIDE * y].r,
-			g_smata.atlas_data[x + ATLAS_SIDE * y].g,
-			g_smata.atlas_data[x + ATLAS_SIDE * y].b,
-			g_smata.atlas_data[x + ATLAS_SIDE * y].a);
-		#endif
 	}
 
 	sprite_rect_t inatlas_sprite_rect = canvas->incanvas_sprite_rect;
@@ -105,15 +86,12 @@ unsigned int smata_register_sprite(canvas_t* canvas)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, g_smata.atlas_id);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
-		//inatlas_sprite_rect.x, inatlas_sprite_rect.y,
-		//inatlas_sprite_rect.w, inatlas_sprite_rect.h,
 		0, 0, ATLAS_SIDE, ATLAS_SIDE,
 		GL_RGBA, GL_UNSIGNED_BYTE, g_smata.atlas_data);
 	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	swp_update_atlas(0);
 
 	unsigned int next_new_index = g_smata.sr_len;
-	fprintf(stderr, "(len = %u) ", g_smata.sr_len);
 	DA_LENGTHEN(g_smata.sr_len += 1, g_smata.sr_cap, g_smata.sr_arr,
 		sprite_rect_t);
 	fprintf(stderr, "to (len = %u)\n", g_smata.sr_len);

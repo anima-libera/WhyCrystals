@@ -103,94 +103,96 @@ int main(int argc, char** argv)
 
 	unsigned int sprite_id_test01 = smata_register_sprite(&canvas);
 
-	memset(canvas.data, 0, canvas.w * canvas.h * sizeof(pixel_t));
+	unsigned int tree_sprite_number = rg_int(g_rg, 1, 6);
+	unsigned int tree_sprite_id_arr[tree_sprite_number];
 
-	canvas.incanvas_sprite_rect.x = 0;
-	canvas.incanvas_sprite_rect.y = 0;
-	canvas.incanvas_sprite_rect.w = 5;
-	canvas.incanvas_sprite_rect.h = 10;
-	canvas.incanvas_sprite_rect.origin_x = 0.5f;
-	canvas.incanvas_sprite_rect.origin_y = 0.0f;
-	canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
-
-	unsigned int w = canvas.incanvas_sprite_rect.w;
-	unsigned int h = canvas.incanvas_sprite_rect.h;
-	for (unsigned int y = h/2; y < h; y++)
+	for (unsigned int i = 0; i < tree_sprite_number; i++)
 	{
-		canvas.data[w/2 + canvas.w * y] = (pixel_t){
-			.r = 100,
-			.g = 40,
-			.b = 0,
-			.a = 255
+		memset(canvas.data, 0, canvas.w * canvas.h * sizeof(pixel_t));
+
+		unsigned int w = rg_int(g_rg, 1, 3) * 2 + 1;
+		unsigned int h_bottom = rg_int(g_rg, 2, 6);
+		unsigned int h_top = w < 5 ? w : rg_int(g_rg, 0, 3) == 0 ? (w-1) : w;
+		int has_plus_shape = w >= 5 ? rg_int(g_rg, 0, 2) == 0 : 0;
+
+		pixel_t bottom_color = {
+			.r = rg_int(g_rg, 70, 255),
+			.g = rg_int(g_rg, 0, 100),
+			.b = rg_int(g_rg, 0, 70),
+			.a = 255,
 		};
-	}
-	for (unsigned int x = 0; x < w; x++)
-	for (unsigned int y = 0; y < h/2; y++)
-	{
-		canvas.data[x + canvas.w * y] = (pixel_t){
-			.r = 100,
-			.g = 200,
-			.b = 50,
-			.a = 255
+		pixel_t top_color = {
+			.r = rg_int(g_rg, 0, 200),
+			.g = rg_int(g_rg, 80, 255),
+			.b = rg_int(g_rg, 0, 100),
+			.a = 255,
 		};
+
+		canvas.incanvas_sprite_rect.x = 0;
+		canvas.incanvas_sprite_rect.y = 0;
+		canvas.incanvas_sprite_rect.w = w;
+		canvas.incanvas_sprite_rect.h = h_bottom + h_top;
+		canvas.incanvas_sprite_rect.origin_x = 0.5f;
+		canvas.incanvas_sprite_rect.origin_y = 0.0f;
+		canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
+
+		for (unsigned int y = h_top; y < h_bottom + h_top; y++)
+		{
+			unsigned int x = w / 2;
+			canvas.data[x + canvas.w * y] = bottom_color;
+		}
+		for (unsigned int x = 0; x < w; x++)
+		for (unsigned int y = 0; y < h_top; y++)
+		{
+			canvas.data[x + canvas.w * y] = top_color;
+		}
+		if (has_plus_shape)
+		{
+			unsigned int x, y;
+			x = 0;
+			y = 0;
+			canvas.data[x + canvas.w * y] = (pixel_t){0};
+			x = w-1;
+			y = 0;
+			canvas.data[x + canvas.w * y] = (pixel_t){0};
+			x = 0;
+			y = h_top-1;
+			canvas.data[x + canvas.w * y] = (pixel_t){0};
+			x = w-1;
+			y = h_top-1;
+			canvas.data[x + canvas.w * y] = (pixel_t){0};
+		}
+
+		tree_sprite_id_arr[i] = smata_register_sprite(&canvas);
 	}
 
-	unsigned int sprite_id_test02 = smata_register_sprite(&canvas);
+	ptis_t* tree_ptis;
+	PTIS_ALLOC_SET(tree_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
+	ptis_print(tree_ptis); printf("\n");
 
-	ptis_t* ptis;
-	PTIS_ALLOC_SET(ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
-	ptis_print(ptis); printf("\n");
+	colt_t* tree_colt = colt_alloc(tree_ptis);
+	colt_print(tree_colt); printf("\n");
 
-	oi_t oi;
-	pos_t* pos;
-	spriteid_t* spriteid;
-	scale_t* scale;
-
-	colt_t* colt = colt_alloc(ptis);
-	colt_print(colt); printf("\n");
-
-	oi = colt_alloc_obj(colt);
-	pos = oi_get_prop(oi, PTI_POS);
-	*pos = (pos_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
-	spriteid = oi_get_prop(oi, PTI_SPRITEID);
-	spriteid->sprite_id = sprite_id_test02;
-	scale = oi_get_prop(oi, PTI_SCALE);
-	scale->scale = 1.0f;
-	colt_print(colt); printf("\n");
-
-	oi = colt_alloc_obj(colt);
-	pos = oi_get_prop(oi, PTI_POS);
-	*pos = (pos_t){.x = 3.0f, .y = 1.0f, .z = 0.0f};
-	spriteid = oi_get_prop(oi, PTI_SPRITEID);
-	spriteid->sprite_id = sprite_id_test02;
-	scale = oi_get_prop(oi, PTI_SCALE);
-	scale->scale = 2.0f;
-	colt_print(colt); printf("\n");
-
-	for (unsigned int i = 0; i < 17 - 2; i++)
+	for (unsigned int i = 0; i < 40; i++)
 	{
-		oi = colt_alloc_obj(colt);
-		pos = oi_get_prop(oi, PTI_POS);
+		oi_t oi = colt_alloc_obj(tree_colt);
+
+		pos_t* pos = oi_get_prop(oi, PTI_POS);
 		*pos = (pos_t){
-			.x = rg_float(g_rg, 4.5f, 6.5f),
-			.y = rg_float(g_rg, -2.0f, 2.0f),
+			.x = rg_float(g_rg, -6.5f, 6.5f),
+			.y = rg_float(g_rg, -3.0f, 3.0f),
 			.z = 0.0f
 		};
-		spriteid = oi_get_prop(oi, PTI_SPRITEID);
-		spriteid->sprite_id = sprite_id_test02;
-		scale = oi_get_prop(oi, PTI_SCALE);
+
+		spriteid_t* spriteid = oi_get_prop(oi, PTI_SPRITEID);
+		spriteid->sprite_id =
+			tree_sprite_id_arr[rg_int(g_rg, 0, tree_sprite_number-1)];
+
+		scale_t* scale = oi_get_prop(oi, PTI_SCALE);
 		scale->scale = 1.0f;
 	}
-	colt_print(colt); printf("\n");
 
-	flags_t* flags;
-	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 9}, PTI_FLAGS);
-	flags->bit_set.exists = 0;
-	flags = oi_get_prop((oi_t){.colt = colt, .row_index = 11}, PTI_FLAGS);
-	flags->bit_set.exists = 0;
-	colt_print(colt); printf("\n");
-
-	//return 0;
+	colt_print(tree_colt); printf("\n");
 
 	int running = 1;
 	while (running)
@@ -217,8 +219,8 @@ int main(int argc, char** argv)
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//swp_apply_on_colt(SPW_ID_POS, colt);
-		swp_apply_on_colt(SPW_ID_SPRITE, colt);
+		//swp_apply_on_colt(SPW_ID_POS, tree_colt);
+		swp_apply_on_colt(SPW_ID_SPRITE, tree_colt);
 
 		SDL_GL_SwapWindow(g_window);
 	}
