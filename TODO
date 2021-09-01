@@ -8,6 +8,12 @@
 - Add wrappers around malloc & co. to catch errors and leaks
 - Fill the abreviation table
 
+- Make a practical (and optimized) way to store and apply shaders on single
+  objects (such as the player, or the cursor, etc.)
+
+- FIXME: Some trees doesn't z-order properly
+- Add a renderer that colors the pixels according to the z value
+
 - Add one chunk of a grid of tiles
 - Add types of tiles
 - Add water
@@ -15,13 +21,13 @@
 - Draw a dirt wall to fill the space between a water tile and the tile y+1
 - Make multiple chunks (do NOT try to optimize anything yet)
 
-- Add a player
-- Make the player movable by targetting destination via the mouse
-- Make the player shoot in a precise direction via the mouse
-
-- Animate the player and animals walking (on 2 small shitty sprites)
-
 - Add animals
+- Make animals move around (a bit like the player can)
+
+- Add bullets
+- Make the player shoot in a precise direction via the mouse
+- Make bullets kill animals
+
 - Add turrets
 - Make turrets shoot at animals
 - Add a core at the middle

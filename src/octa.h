@@ -174,6 +174,6 @@ struct oi_t
 	unsigned int row_index;
 };
 typedef struct oi_t oi_t;
-void* oi_get_prop(oi_t oi, pti_t pti);
+void* obj_get_prop(oi_t oi, pti_t pti);
 
 #endif /* WHYCRYSTALS_HEADER_OCTA__ */

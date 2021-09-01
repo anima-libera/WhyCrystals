@@ -212,7 +212,7 @@ void colt_print(const colt_t* colt)
 	printf("]");
 }
 
-void* oi_get_prop(oi_t oi, pti_t pti)
+void* obj_get_prop(oi_t oi, pti_t pti)
 {
 	char* data = colt_get_col(oi.colt, pti)->data;
 	unsigned int prop_size = g_prop_info_table[pti].size;

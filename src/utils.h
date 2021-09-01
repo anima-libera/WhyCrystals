@@ -35,4 +35,9 @@ unsigned int umax(unsigned int a, unsigned int b);
 		} \
 	} while (0)
 
+static inline float squaref(float x)
+{
+	return x * x;
+}
+
 #endif /* WHYCRYSTALS_HEADER_UTILS__ */

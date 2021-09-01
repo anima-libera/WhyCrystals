@@ -4,7 +4,6 @@ layout(location = 1) uniform uvec2 u_window_wh;
 layout(points) in;
 layout(line_strip, max_vertices = 5) out;
 in uint v_flags[];
-
 #define OBJ_FLAG_EXISTS (1 << 0)
 
 void main()
