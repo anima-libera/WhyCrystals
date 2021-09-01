@@ -22,6 +22,8 @@
 
 int main(int argc, char** argv)
 {
+	/* Command line argument handling. */
+
 	int test_randon_generator = 0;
 	for (unsigned int i = 1; i < (unsigned int)argc; i++)
 	{
@@ -49,6 +51,8 @@ int main(int argc, char** argv)
 		}
 		return 0;
 	}
+
+	/* Game initialization. */
 
 	if (init_graphics() != 0)
 	{
@@ -78,25 +82,29 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	/* Generating sprites. */
+
 	canvas_t canvas;
 	canvas.w = 50;
 	canvas.h = 50;
 	canvas.data = calloc(canvas.w * canvas.h, sizeof(pixel_t));
 
+	#define CISR canvas.incanvas_sprite_rect
+
 	/* Test sprite. */
 
 	unsigned int sprite_id_test;
 	{
-		canvas.incanvas_sprite_rect.x = 0;
-		canvas.incanvas_sprite_rect.y = 0;
-		canvas.incanvas_sprite_rect.w = 8;
-		canvas.incanvas_sprite_rect.h = 8;
-		canvas.incanvas_sprite_rect.origin_x = 0.5f;
-		canvas.incanvas_sprite_rect.origin_y = 0.5f;
-		canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
+		CISR.x = 0;
+		CISR.y = 0;
+		CISR.w = 8;
+		CISR.h = 8;
+		CISR.origin_x = 0.5f;
+		CISR.origin_y = 0.5f;
+		CISR.flags.bit_set.vertical = 1;
 
-		for (unsigned int x = 0; x < canvas.incanvas_sprite_rect.w; x++)
-		for (unsigned int y = 0; y < canvas.incanvas_sprite_rect.h; y++)
+		for (unsigned int x = 0; x < CISR.w; x++)
+		for (unsigned int y = 0; y < CISR.h; y++)
 		{
 			canvas.data[x + canvas.w * y] = (pixel_t){
 				.r = rg_int(g_rg, 100, 255),
@@ -114,13 +122,13 @@ int main(int argc, char** argv)
 
 	unsigned int player_sprite_id_arr[2];
 	{
-		canvas.incanvas_sprite_rect.x = 0;
-		canvas.incanvas_sprite_rect.y = 0;
-		canvas.incanvas_sprite_rect.w = 5;
-		canvas.incanvas_sprite_rect.h = 6;
-		canvas.incanvas_sprite_rect.origin_x = 0.5f;
-		canvas.incanvas_sprite_rect.origin_y = 0.0f;
-		canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
+		CISR.x = 0;
+		CISR.y = 0;
+		CISR.w = 5;
+		CISR.h = 6;
+		CISR.origin_x = 0.5f;
+		CISR.origin_y = 0.0f;
+		CISR.flags.bit_set.vertical = 1;
 
 		pixel_t white = (pixel_t){
 			.r = 255,
@@ -135,6 +143,12 @@ int main(int argc, char** argv)
 		#define PAINT(x_, y_) canvas.data[(x_) + canvas.w * (y_)] = white
 		#define UNPAINT(x_, y_) canvas.data[(x_) + canvas.w * (y_)] = not_white
 
+		/* . . @ . . *
+		 * . @ @ @ . *
+		 * @ . @ . @ *
+		 * . . @ . . *
+		 * . @ . @ . *
+		 * . @ . @ . */
 		PAINT(2, 0);
 		PAINT(1, 1);
 		PAINT(2, 1);
@@ -147,14 +161,18 @@ int main(int argc, char** argv)
 		PAINT(3, 4);
 		PAINT(1, 5);
 		PAINT(3, 5);
-
 		player_sprite_id_arr[0] = smata_register_sprite(&canvas);
 
+		/* . . @ . . *
+		 * . @ @ @ . *
+		 * @ . @ . @ *
+		 * . . @ . . *
+		 * . @ . @ . *
+		 * @ . . . @ */
 		UNPAINT(1, 5);
 		UNPAINT(3, 5);
 		PAINT(0, 5);
 		PAINT(4, 5);
-
 		player_sprite_id_arr[1] = smata_register_sprite(&canvas);
 
 		#undef PAINT
@@ -188,13 +206,13 @@ int main(int argc, char** argv)
 				.a = 255,
 			};
 
-			canvas.incanvas_sprite_rect.x = 0;
-			canvas.incanvas_sprite_rect.y = 0;
-			canvas.incanvas_sprite_rect.w = w;
-			canvas.incanvas_sprite_rect.h = h_bottom + h_top;
-			canvas.incanvas_sprite_rect.origin_x = 0.5f;
-			canvas.incanvas_sprite_rect.origin_y = 0.0f;
-			canvas.incanvas_sprite_rect.flags.bit_set.vertical = 1;
+			CISR.x = 0;
+			CISR.y = 0;
+			CISR.w = w;
+			CISR.h = h_bottom + h_top;
+			CISR.origin_x = 0.5f;
+			CISR.origin_y = 0.0f;
+			CISR.flags.bit_set.vertical = 1;
 
 			for (unsigned int y = h_top; y < h_bottom + h_top; y++)
 			{
@@ -226,6 +244,57 @@ int main(int argc, char** argv)
 			tree_sprite_id_arr[i] = smata_register_sprite(&canvas);
 		}
 	}
+
+	/* Animal sprites. */
+
+	unsigned int animal_sprite_number = rg_int(g_rg, 1, 4);
+	unsigned int animal_sprite_id_arr[animal_sprite_number];
+	{
+		for (unsigned int i = 0; i < animal_sprite_number; i++)
+		{
+			memset(canvas.data, 0, canvas.w * canvas.h * sizeof(pixel_t));
+
+			unsigned int w = 3;
+			unsigned int h = 3;
+
+			pixel_t color;
+			unsigned int color_channel_sum;
+			do
+			{
+				color = (pixel_t){
+					.r = rg_int(g_rg, 0, 255),
+					.g = rg_int(g_rg, 0, 255),
+					.b = rg_int(g_rg, 0, 255),
+					.a = 255,
+				};
+				color_channel_sum = color.r + color.g + color.b;
+			} while (255 + 128 <= color_channel_sum && color_channel_sum <= 255 * 2 + 128);
+
+			CISR.x = 0;
+			CISR.y = 0;
+			CISR.w = w;
+			CISR.h = h;
+			CISR.origin_x = 0.5f;
+			CISR.origin_y = 0.0f;
+			CISR.flags.bit_set.vertical = 1;
+
+			#define PAINT(x_, y_) canvas.data[(x_) + canvas.w * (y_)] = color
+
+			PAINT(0, 2);
+			PAINT(0, 1);
+			PAINT(0, 0);
+			PAINT(1, 0);
+			PAINT(2, 0);
+			PAINT(2, 1);
+			PAINT(2, 2);
+
+			#undef PAINT
+
+			animal_sprite_id_arr[i] = smata_register_sprite(&canvas);
+		}
+	}
+
+	#undef CISR
 
 	/* Player. */
 
@@ -290,6 +359,31 @@ int main(int argc, char** argv)
 		spriteid_t* spriteid = obj_get_prop(oi, PTI_SPRITEID);
 		spriteid->sprite_id =
 			tree_sprite_id_arr[rg_int(g_rg, 0, tree_sprite_number-1)];
+
+		scale_t* scale = obj_get_prop(oi, PTI_SCALE);
+		scale->scale = 1.0f;
+	}
+
+	/* Animals. */
+
+	ptis_t* animal_ptis;
+	PTIS_ALLOC_SET(animal_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
+	colt_t* animal_colt = colt_alloc(animal_ptis);
+
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		oi_t oi = colt_alloc_obj(animal_colt);
+
+		pos_t* pos = obj_get_prop(oi, PTI_POS);
+		*pos = (pos_t){
+			.x = rg_float(g_rg, -6.5f, 6.5f),
+			.y = rg_float(g_rg, -3.0f, 3.0f),
+			.z = 0.0f,
+		};
+
+		spriteid_t* spriteid = obj_get_prop(oi, PTI_SPRITEID);
+		spriteid->sprite_id =
+			animal_sprite_id_arr[rg_int(g_rg, 0, animal_sprite_number-1)];
 
 		scale_t* scale = obj_get_prop(oi, PTI_SCALE);
 		scale->scale = 1.0f;
@@ -403,12 +497,14 @@ int main(int argc, char** argv)
 		if (display_positions)
 		{
 			swp_apply_on_colt(SPW_ID_POS, tree_colt);
+			swp_apply_on_colt(SPW_ID_POS, animal_colt);
 			swp_apply_on_colt(SPW_ID_POS, player_colt);
 		}
 
 		swp_apply_on_colt(SPW_ID_POS, cursor_colt);
 
 		swp_apply_on_colt(SPW_ID_SPRITE, tree_colt);
+		swp_apply_on_colt(SPW_ID_SPRITE, animal_colt);
 		swp_apply_on_colt(SPW_ID_SPRITE, player_colt);
 
 		SDL_GL_SwapWindow(g_window);

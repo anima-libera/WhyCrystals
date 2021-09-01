@@ -1,15 +1,23 @@
 
-- Fuse the property "spriteid" and "scale", or not, but think about it
+- Make properties be able to be more than one vertex attribute,
+  then fuse the property "spriteid" and "scale"
 - Add a flag on sprite ids or something to mirror the sprite along the y axis
 - Make a property know whether it is OpenGL-buffer-izable or not
+
+- Make animals move around (a bit like the player can)
+  by adding a property that contains the motion data
+- Add a shader to display the motion data for debuging
+
 - Make a command line based debugging interface
 - Document headers
 - Replace assert by a custom ASSERT macro with nice explainations
 - Add wrappers around malloc & co. to catch errors and leaks
+- Add a tracing system with signal handlers to print the trace stack
 - Fill the abreviation table
 
 - Make a practical (and optimized) way to store and apply shaders on single
   objects (such as the player, or the cursor, etc.)
+- Add 0-sized properties (aka tag components)
 
 - FIXME: Some trees doesn't z-order properly
 - Add a renderer that colors the pixels according to the z value
@@ -20,9 +28,6 @@
 - Lower the level of water
 - Draw a dirt wall to fill the space between a water tile and the tile y+1
 - Make multiple chunks (do NOT try to optimize anything yet)
-
-- Add animals
-- Make animals move around (a bit like the player can)
 
 - Add bullets
 - Make the player shoot in a precise direction via the mouse
@@ -44,4 +49,6 @@
 - Use glBufferSubData instead of glBufferData when possible
 - Optimize smata
 - Optimize octa
+  - By making the finding of unused lines super fast (like does an allocator)
+  - By updating the OpenGL buffers only when necessary and on smaller slices
 - Expand the TODO list
