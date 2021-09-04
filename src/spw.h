@@ -40,7 +40,8 @@ typedef struct spw_buffer_t spw_buffer_t;
 struct spw_attrib_t
 {
 	pti_t pti;
-	GLuint location; /* Or index ??? */
+	unsigned int location_count;
+	GLuint* location_arr;
 };
 typedef struct spw_attrib_t spw_attrib_t;
 
@@ -64,7 +65,7 @@ enum spw_id_t
 	SPW_COUNT
 };
 typedef enum spw_id_t spw_id_t;
-spw_t g_spw_table[SPW_COUNT];
+extern spw_t g_spw_table[SPW_COUNT];
 int init_swp_table(void);
 void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt);
 

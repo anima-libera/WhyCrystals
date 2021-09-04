@@ -27,12 +27,13 @@ union flags_t
 	flags_bit_set_t bit_set;
 };
 typedef union flags_t flags_t;
-void flags_col_givetoshader(GLuint attrib_location);
+void flags_col_givetoshader(GLuint* attrib_location_arr);
 #define FLAGS_INFO \
 	{ \
 		.name = "flags", \
 		.size = sizeof(flags_t), \
 		.col_givetoshader_callback = flags_col_givetoshader, \
+		.is_opengl_synced = 1, \
 	}
 
 /* Position property. */
@@ -42,12 +43,13 @@ struct pos_t
 	float x, y, z;
 };
 typedef struct pos_t pos_t;
-void pos_col_givetoshader(GLuint attrib_location);
+void pos_col_givetoshader(GLuint* attrib_location_arr);
 #define POS_INFO \
 	{ \
 		.name = "pos", \
 		.size = sizeof(pos_t), \
 		.col_givetoshader_callback = pos_col_givetoshader, \
+		.is_opengl_synced = 1, \
 	}
 
 /* Sprite id property. */
@@ -57,12 +59,13 @@ struct spriteid_t
 	unsigned int sprite_id;
 };
 typedef struct spriteid_t spriteid_t;
-void spriteid_col_givetoshader(GLuint attrib_location);
+void spriteid_col_givetoshader(GLuint* attrib_location_arr);
 #define SPRITEID_INFO \
 	{ \
 		.name = "spriteid", \
 		.size = sizeof(spriteid_t), \
 		.col_givetoshader_callback = spriteid_col_givetoshader, \
+		.is_opengl_synced = 1, \
 	}
 
 /* Scale property. */
@@ -72,12 +75,13 @@ struct scale_t
 	float scale;
 };
 typedef struct scale_t scale_t;
-void scale_col_givetoshader(GLuint attrib_location);
+void scale_col_givetoshader(GLuint* attrib_location_arr);
 #define SCALE_INFO \
 	{ \
 		.name = "scale", \
 		.size = sizeof(scale_t), \
 		.col_givetoshader_callback = scale_col_givetoshader, \
+		.is_opengl_synced = 1, \
 	}
 
 /* TODO: Delete this test property. */
@@ -86,12 +90,13 @@ struct color_t
 	float r, g, b;
 };
 typedef struct color_t color_t;
-void color_col_givetoshader(GLuint attrib_location);
+void color_col_givetoshader(GLuint* attrib_location_arr);
 #define COLOR_INFO \
 	{ \
 		.name = "color", \
 		.size = sizeof(color_t), \
 		.col_givetoshader_callback = color_col_givetoshader, \
+		.is_opengl_synced = 1, \
 	}
 
 /* Property type id. */
@@ -112,7 +117,8 @@ struct porp_info_t
 {
 	const char* name;
 	unsigned int size; /* sizeof(thing_t) */
-	void (*col_givetoshader_callback)(GLuint attrib_location);
+	void (*col_givetoshader_callback)(GLuint* attrib_location_arr);
+	int is_opengl_synced;
 };
 typedef struct porp_info_t porp_info_t;
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+/* Used by DA_LENGTHEN. */
 unsigned int umax(unsigned int a, unsigned int b);
 
 /* Dynamic array reallocator.
@@ -34,6 +35,23 @@ unsigned int umax(unsigned int a, unsigned int b);
 			cap_ = new_cap; \
 		} \
 	} while (0)
+
+/* Expands to the number of arguments. */
+#define ARGS_COUNT(...) (sizeof((char[]){__VA_ARGS__}))
+
+/* Expands to a pointer to an array containing the arguments.
+ * All the arguments should be compatible with the given type. */
+#define ARGS_ARR_PTR(type_, ...) ((void*)&((type_[]){__VA_ARGS__}))
+
+/* Allocates and initializes the returned buffer. Used by ARGS_ALLOCATED. */
+void* malloc_memcpy(unsigned int size, void* src);
+
+/* Expands to a pointer to an allocated buffer containing the arguments.
+ * All the arguments should be compatible with the given type. */
+#define ARGS_ALLOCATED(type_, ...) \
+	malloc_memcpy( \
+		sizeof(type_) * ARGS_COUNT(__VA_ARGS__), \
+		ARGS_ARR_PTR(type_, __VA_ARGS__))
 
 static inline float squaref(float x)
 {

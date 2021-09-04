@@ -8,6 +8,9 @@
   by adding a property that contains the motion data
 - Add a shader to display the motion data for debuging
 
+- Add the concept of displayer, which can be a collection of shaders
+  that can all be applied all at once on colts
+
 - Make a command line based debugging interface
 - Document headers
 - Replace assert by a custom ASSERT macro with nice explainations

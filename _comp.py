@@ -147,7 +147,7 @@ build_command_args.append("-lGLEW")
 build_command_args.append("`sdl2-config --cflags --libs`") # See the SDL2 doc
 build_command_args.append("-lm")
 build_command = " ".join(build_command_args)
-print_blue(("RELEASE" if release_build else "DEBUG") + " BUILD")
+print(("RELEASE" if release_build else "DEBUG") + " BUILD")
 print_blue(build_command)
 build_exit_status = os.system(build_command)
 

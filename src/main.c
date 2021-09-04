@@ -24,12 +24,12 @@ int main(int argc, char** argv)
 {
 	/* Command line argument handling. */
 
-	int test_randon_generator = 0;
+	int test_random_generator = 0;
 	for (unsigned int i = 1; i < (unsigned int)argc; i++)
 	{
 		if (strcmp(argv[i], "-r") == 0)
 		{
-			test_randon_generator = 1;
+			test_random_generator = 1;
 		}
 		else if (strcmp(argv[i], "-d") == 0)
 		{
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	if (test_randon_generator)
+	if (test_random_generator)
 	{
 		size_t write(int fd, const void* buf, size_t count);
 

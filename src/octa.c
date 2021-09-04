@@ -7,33 +7,33 @@
 #include <limits.h>
 #include <assert.h>
 
-void flags_col_givetoshader(GLuint attrib_location)
+void flags_col_givetoshader(GLuint* attrib_location_arr)
 {
-	glVertexAttribIPointer(attrib_location, 1, GL_UNSIGNED_INT,
+	glVertexAttribIPointer(attrib_location_arr[0], 1, GL_UNSIGNED_INT,
 		sizeof(flags_t), (void*)offsetof(flags_t, plain));
 }
 
-void pos_col_givetoshader(GLuint attrib_location)
+void pos_col_givetoshader(GLuint* attrib_location_arr)
 {
-	glVertexAttribPointer(attrib_location, 3, GL_FLOAT, GL_FALSE,
+	glVertexAttribPointer(attrib_location_arr[0], 3, GL_FLOAT, GL_FALSE,
 		sizeof(pos_t), (void*)offsetof(pos_t, x));
 }
 
-void spriteid_col_givetoshader(GLuint attrib_location)
+void spriteid_col_givetoshader(GLuint* attrib_location_arr)
 {
-	glVertexAttribIPointer(attrib_location, 1, GL_UNSIGNED_INT,
+	glVertexAttribIPointer(attrib_location_arr[0], 1, GL_UNSIGNED_INT,
 		sizeof(spriteid_t), (void*)offsetof(spriteid_t, sprite_id));
 }
 
-void scale_col_givetoshader(GLuint attrib_location)
+void scale_col_givetoshader(GLuint* attrib_location_arr)
 {
-	glVertexAttribPointer(attrib_location, 1, GL_FLOAT, GL_FALSE,
+	glVertexAttribPointer(attrib_location_arr[0], 1, GL_FLOAT, GL_FALSE,
 		sizeof(scale_t), (void*)offsetof(scale_t, scale));
 }
 
-void color_col_givetoshader(GLuint attrib_location)
+void color_col_givetoshader(GLuint* attrib_location_arr)
 {
-	glVertexAttribPointer(attrib_location, 3, GL_FLOAT, GL_FALSE,
+	glVertexAttribPointer(attrib_location_arr[0], 3, GL_FLOAT, GL_FALSE,
 		sizeof(color_t), (void*)offsetof(color_t, r));
 }
 

@@ -3,6 +3,7 @@
 #include "shaders.h"
 #include "octa.h"
 #include "smata.h"
+#include "utils.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -38,8 +39,11 @@ int init_swp_table(void)
 				sizeof(buffer_array)); \
 		} while (0)
 
-	#define A(pti_, location_) \
-		((spw_attrib_t){.pti = pti_, .location = location_})
+	#define A(pti_, ...) \
+		((spw_attrib_t){ \
+			.pti = pti_, \
+			.location_count = ARGS_COUNT(__VA_ARGS__), \
+			.location_arr = ARGS_ALLOCATED(GLuint, __VA_ARGS__)})
 	#define SWP_DECLARE_ATTRIBS(index_, ...) \
 		do \
 		{ \
@@ -106,16 +110,15 @@ void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt)
 	}
 	for (unsigned int i = 0; i < g_spw_table[spw_id].attrib_count; i++)
 	{
-		pti_t pti = g_spw_table[spw_id].attrib_arr[i].pti;
-		GLuint location = g_spw_table[spw_id].attrib_arr[i].location;
-
-		const col_t* col = colt_get_col(colt, pti);
+		const spw_attrib_t* attrib = &g_spw_table[spw_id].attrib_arr[i];
+		const col_t* col = colt_get_col(colt, attrib->pti);
 		GLuint opengl_buf_id = col->opengl_buf_id;
 		glBindBuffer(GL_ARRAY_BUFFER, opengl_buf_id);
 		glBufferSubData(GL_ARRAY_BUFFER, 0,
-			colt->row_count * g_prop_info_table[pti].size,
+			colt->row_count * g_prop_info_table[attrib->pti].size,
 			col->data);
-		g_prop_info_table[pti].col_givetoshader_callback(location);
+		g_prop_info_table[attrib->pti].col_givetoshader_callback(
+			attrib->location_arr);
 	}
 
 	for (unsigned int i = 0; i < g_spw_table[spw_id].buffer_count; i++)
