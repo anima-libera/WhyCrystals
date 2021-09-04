@@ -36,15 +36,19 @@ unsigned int umax(unsigned int a, unsigned int b);
 		} \
 	} while (0)
 
+/* Allocates and initializes the returned buffer. */
+void* malloc_memcpy(unsigned int size, void* src);
+
+void* malloc_memcpy_2(
+	unsigned int size_1, void* src_1,
+	unsigned int size_2, void* src_2);
+
 /* Expands to the number of arguments. */
 #define ARGS_COUNT(...) (sizeof((char[]){__VA_ARGS__}))
 
 /* Expands to a pointer to an array containing the arguments.
  * All the arguments should be compatible with the given type. */
 #define ARGS_ARR_PTR(type_, ...) ((void*)&((type_[]){__VA_ARGS__}))
-
-/* Allocates and initializes the returned buffer. Used by ARGS_ALLOCATED. */
-void* malloc_memcpy(unsigned int size, void* src);
 
 /* Expands to a pointer to an allocated buffer containing the arguments.
  * All the arguments should be compatible with the given type. */

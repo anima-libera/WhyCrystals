@@ -18,7 +18,7 @@
 #error C compiler required
 #endif
 
-#define TAU 6.28318530717
+#define TAU 6.28318530717f
 
 int main(int argc, char** argv)
 {
@@ -280,6 +280,9 @@ int main(int argc, char** argv)
 
 			#define PAINT(x_, y_) canvas.data[(x_) + canvas.w * (y_)] = color
 
+			/* @ @ @ *
+			 * @ . @ *
+			 * @ . @ */
 			PAINT(0, 2);
 			PAINT(0, 1);
 			PAINT(0, 0);
@@ -296,10 +299,9 @@ int main(int argc, char** argv)
 
 	#undef CISR
 
-	/* Player. */
+	/* Player colt. */
 
-	ptis_t* player_ptis;
-	PTIS_ALLOC_SET(player_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITE);
+	ptis_t* player_ptis = PTIS_ALLOC(PTI_FLAGS, PTI_POS, PTI_SPRITE);
 	colt_t* player_colt = colt_alloc(player_ptis);
 
 	oi_t player_oi;
@@ -319,10 +321,9 @@ int main(int argc, char** argv)
 		sprite->scale = 1.0f;
 	}
 
-	/* Cursor. */
+	/* Cursor colt. */
 
-	ptis_t* cursor_ptis;
-	PTIS_ALLOC_SET(cursor_ptis, PTI_FLAGS, PTI_POS);
+	ptis_t* cursor_ptis = PTIS_ALLOC(PTI_FLAGS, PTI_POS);
 	colt_t* cursor_colt = colt_alloc(cursor_ptis);
 
 	oi_t cursor_oi;
@@ -337,10 +338,9 @@ int main(int argc, char** argv)
 		};
 	}
 
-	/* Trees. */
+	/* Trees colt. */
 
-	ptis_t* tree_ptis;
-	PTIS_ALLOC_SET(tree_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITE);
+	ptis_t* tree_ptis = PTIS_ALLOC(PTI_FLAGS, PTI_POS, PTI_SPRITE);
 	colt_t* tree_colt = colt_alloc(tree_ptis);
 
 	for (unsigned int i = 0; i < 40; i++)
@@ -360,10 +360,9 @@ int main(int argc, char** argv)
 		sprite->scale = 1.0f;
 	}
 
-	/* Animals. */
+	/* Animals colt. */
 
-	ptis_t* animal_ptis;
-	PTIS_ALLOC_SET(animal_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITE);
+	ptis_t* animal_ptis = PTIS_ALLOC(PTI_FLAGS, PTI_POS, PTI_SPRITE, PTI_WALK_PATH);
 	colt_t* animal_colt = colt_alloc(animal_ptis);
 
 	for (unsigned int i = 0; i < 10; i++)
@@ -381,6 +380,18 @@ int main(int argc, char** argv)
 		sprite->sprite_id =
 			animal_sprite_id_arr[rg_int(g_rg, 0, animal_sprite_number-1)];
 		sprite->scale = 1.0f;
+
+		walk_path_t* walk_path = obj_get_prop(oi, PTI_WALK_PATH);
+		*walk_path = (walk_path_t){
+			.is_moving = 0,
+			.motion_factor = 0.05f,
+			.target_x = pos->x,
+			.target_y = pos->y,
+			.motion_x = 0.0f,
+			.motion_y = 0.0f,
+			.square_dist_to_target = 0.0f,
+			.walking_animation_start_time = 0,
+		};
 	}
 
 	/* Player path. */
@@ -450,6 +461,36 @@ int main(int argc, char** argv)
 						case SDLK_d:
 							display_positions = !display_positions;
 						break;
+						case SDLK_s:
+							for (unsigned int i = 0; i < 10; i++)
+							{
+								oi_t oi = colt_alloc_obj(animal_colt);
+
+								pos_t* pos = obj_get_prop(oi, PTI_POS);
+								*pos = (pos_t){
+									.x = rg_float(g_rg, -6.5f, 6.5f),
+									.y = rg_float(g_rg, -3.0f, 3.0f),
+									.z = 0.0f,
+								};
+
+								sprite_t* sprite = obj_get_prop(oi, PTI_SPRITE);
+								sprite->sprite_id =
+									animal_sprite_id_arr[rg_int(g_rg, 0, animal_sprite_number-1)];
+								sprite->scale = 1.0f;
+
+								walk_path_t* walk_path = obj_get_prop(oi, PTI_WALK_PATH);
+								*walk_path = (walk_path_t){
+									.is_moving = 0,
+									.motion_factor = 0.05f,
+									.target_x = pos->x,
+									.target_y = pos->y,
+									.motion_x = 0.0f,
+									.motion_y = 0.0f,
+									.square_dist_to_target = 0.0f,
+									.walking_animation_start_time = 0,
+								};
+							}
+						break;
 					}
 				break;
 			}
@@ -485,21 +526,72 @@ int main(int argc, char** argv)
 			}
 		}
 
+		const col_t* animal_col_flags = colt_get_col(animal_colt, PTI_FLAGS);
+		col_t* animal_col_pos = colt_get_col(animal_colt, PTI_POS);
+		col_t* animal_col_walk_path = colt_get_col(animal_colt, PTI_WALK_PATH);
+		for (unsigned int row_index = 0; row_index < animal_colt->row_count; row_index++)
+		{
+			const flags_t* flags = &((flags_t*)animal_col_flags->data)[row_index];
+			if (!flags->bit_set.exists)
+			{
+				continue;
+			}
+
+			pos_t* pos = &((pos_t*)animal_col_pos->data)[row_index];
+			walk_path_t* walk_path = &((walk_path_t*)animal_col_walk_path->data)[row_index];
+			
+			if (walk_path->is_moving)
+			{
+				pos->x += walk_path->motion_x;
+				pos->y += walk_path->motion_y;
+
+				const float previous_square_dist_to_target = walk_path->square_dist_to_target;
+				walk_path->square_dist_to_target =
+					squaref(pos->x - walk_path->target_x) +
+					squaref(pos->y - walk_path->target_y);
+				if (walk_path->square_dist_to_target >= previous_square_dist_to_target)
+				{
+					pos->x = walk_path->target_x;
+					pos->y = walk_path->target_y;
+
+					walk_path->is_moving = 0;
+				}
+			}
+			else if (rg_int(g_rg, 0, 1000) == 0)
+			{
+				float dist = rg_float(g_rg, 0.5f, 1.5f);
+				float angle = rg_float(g_rg, 0.0f, TAU);
+
+				walk_path->target_x = pos->x + cosf(angle) * dist;
+				walk_path->target_y = pos->y + sinf(angle) * dist;
+
+				walk_path->square_dist_to_target =
+					squaref(pos->x - walk_path->target_x) +
+					squaref(pos->y - walk_path->target_y);
+
+				walk_path->motion_x = cosf(angle) * walk_path->motion_factor;
+				walk_path->motion_y = sinf(angle) * walk_path->motion_factor;
+
+				walk_path->is_moving = 1;
+			}
+		}
+
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		if (display_positions)
-		{
-			swp_apply_on_colt(SPW_ID_POS, tree_colt);
-			swp_apply_on_colt(SPW_ID_POS, animal_colt);
-			swp_apply_on_colt(SPW_ID_POS, player_colt);
-		}
 
 		swp_apply_on_colt(SPW_ID_POS, cursor_colt);
 
 		swp_apply_on_colt(SPW_ID_SPRITE, tree_colt);
 		swp_apply_on_colt(SPW_ID_SPRITE, animal_colt);
 		swp_apply_on_colt(SPW_ID_SPRITE, player_colt);
+
+		if (display_positions)
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+			swp_apply_on_colt(SPW_ID_POS, tree_colt);
+			swp_apply_on_colt(SPW_ID_POS, animal_colt);
+			swp_apply_on_colt(SPW_ID_POS, player_colt);
+		}
 
 		SDL_GL_SwapWindow(g_window);
 	}

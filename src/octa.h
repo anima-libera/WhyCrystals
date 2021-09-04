@@ -33,7 +33,7 @@ void flags_col_givetoshader(GLuint* attrib_location_arr);
 		.name = "flags", \
 		.size = sizeof(flags_t), \
 		.col_givetoshader_callback = flags_col_givetoshader, \
-		.is_opengl_synced = 1, \
+		.attrib_count = 1, \
 	}
 
 /* Position property. */
@@ -49,7 +49,7 @@ void pos_col_givetoshader(GLuint* attrib_location_arr);
 		.name = "pos", \
 		.size = sizeof(pos_t), \
 		.col_givetoshader_callback = pos_col_givetoshader, \
-		.is_opengl_synced = 1, \
+		.attrib_count = 1, \
 	}
 
 /* Sprite property. */
@@ -67,7 +67,7 @@ void sprite_col_givetoshader(GLuint* attrib_location_arr);
 		.name = "sprite", \
 		.size = sizeof(sprite_t), \
 		.col_givetoshader_callback = sprite_col_givetoshader, \
-		.is_opengl_synced = 1, \
+		.attrib_count = 2, \
 	}
 
 /* TODO: Delete this test property. */
@@ -82,7 +82,26 @@ void color_col_givetoshader(GLuint* attrib_location_arr);
 		.name = "color", \
 		.size = sizeof(color_t), \
 		.col_givetoshader_callback = color_col_givetoshader, \
-		.is_opengl_synced = 1, \
+		.attrib_count = 1, \
+	}
+
+/* Able to walk property. */
+struct walk_path_t
+{
+	int is_moving;
+	float motion_factor;
+	float target_x, target_y;
+	float motion_x, motion_y;
+	float square_dist_to_target;
+	unsigned int walking_animation_start_time;
+};
+typedef struct walk_path_t walk_path_t;
+#define WALK_PATH_INFO \
+	{ \
+		.name = "walk_path", \
+		.size = sizeof(walk_path_t), \
+		.col_givetoshader_callback = NULL, \
+		.attrib_count = 0, \
 	}
 
 /* Property type id. */
@@ -92,6 +111,7 @@ enum pti_t
 	PTI_POS,
 	PTI_SPRITE,
 	PTI_COLOR,
+	PTI_WALK_PATH,
 	PROP_TYPE_COUNT
 };
 typedef enum pti_t pti_t;
@@ -103,7 +123,7 @@ struct porp_info_t
 	const char* name;
 	unsigned int size; /* sizeof(thing_t) */
 	void (*col_givetoshader_callback)(GLuint* attrib_location_arr);
-	int is_opengl_synced;
+	unsigned int attrib_count; /* Shader program vertex attribute count. */
 };
 typedef struct porp_info_t porp_info_t;
 extern const porp_info_t g_prop_info_table[PROP_TYPE_COUNT];
@@ -115,6 +135,7 @@ struct ptis_t
 	pti_t arr[]; /* Should be sorted. */
 };
 typedef struct ptis_t ptis_t;
+#if 0
 #define PTIS_ALLOC_SET(pti_ptr_, ...) \
 	do \
 	{ \
@@ -123,6 +144,13 @@ typedef struct ptis_t ptis_t;
 		pti_ptr_->len = sizeof(pti_array) / sizeof(pti_t); \
 		memcpy(&pti_ptr_->arr, pti_array, sizeof(pti_array)); \
 	} while (0)
+#endif
+#define PTIS_ALLOC(...) \
+	malloc_memcpy_2( \
+		sizeof(ptis_t), \
+		&(ptis_t){.len = ARGS_COUNT(__VA_ARGS__)}, \
+		sizeof(pti_t) * ARGS_COUNT(__VA_ARGS__), \
+		ARGS_ARR_PTR(pti_t, __VA_ARGS__))
 void ptis_print(const ptis_t* ptis);
 
 /* Column. */
@@ -130,6 +158,7 @@ struct col_t
 {
 	pti_t pti;
 	GLuint opengl_buf_id;
+	int opengl_buf_needs_resize;
 	void* data;
 };
 typedef struct col_t col_t;
@@ -146,7 +175,7 @@ typedef struct oi_t oi_t;
 colt_t* colt_alloc(const ptis_t* ptis);
 void colt_add_rows(colt_t* colt, unsigned int how_much);
 oi_t colt_alloc_obj(colt_t* colt);
-const col_t* colt_get_col(const colt_t* colt, pti_t pti);
+col_t* colt_get_col(colt_t* colt, pti_t pti);
 void colt_print(const colt_t* colt);
 
 /* Octa, the array of tables. */

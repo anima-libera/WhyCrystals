@@ -38,6 +38,7 @@ const porp_info_t g_prop_info_table[PROP_TYPE_COUNT] = {
 	[PTI_POS] = POS_INFO,
 	[PTI_SPRITE] = SPRITE_INFO,
 	[PTI_COLOR] = COLOR_INFO,
+	[PTI_WALK_PATH] = WALK_PATH_INFO,
 };
 
 void pti_print(pti_t pti)
@@ -67,8 +68,19 @@ colt_t* colt_alloc(const ptis_t* ptis)
 	for (unsigned int i = 0; i < colt->col_count; i++)
 	{
 		colt->col_arr[i].pti = ptis->arr[i];
-		glGenBuffers(1, &colt->col_arr[i].opengl_buf_id);
+		colt->col_arr[i].opengl_buf_id = 0;
+		colt->col_arr[i].opengl_buf_needs_resize = 0;
 		colt->col_arr[i].data = NULL;
+		#if 0
+		if (g_prop_info_table[colt->col_arr[i].pti].is_opengl_synced)
+		{
+			glGenBuffers(1, &colt->col_arr[i].opengl_buf_id);
+		}
+		else
+		{
+			colt->col_arr[i].opengl_buf_id = 0;
+		}
+		#endif
 	}
 	colt->row_count = 0;
 	return colt;
@@ -96,9 +108,15 @@ void colt_add_rows(colt_t* colt, unsigned int how_much)
 		unsigned int prop_size = g_prop_info_table[colt->col_arr[i].pti].size;
 		colt->col_arr[i].data = realloc(colt->col_arr[i].data,
 			new_row_count * prop_size);
-		glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[i].opengl_buf_id);
-		glBufferData(GL_ARRAY_BUFFER, new_row_count * prop_size,
-			colt->col_arr[i].data, GL_DYNAMIC_DRAW);
+		colt->col_arr[i].opengl_buf_needs_resize = 1;
+		#if 0
+		if (g_prop_info_table[colt->col_arr[i].pti].is_opengl_synced)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, colt->col_arr[i].opengl_buf_id);
+			glBufferData(GL_ARRAY_BUFFER, new_row_count * prop_size,
+				colt->col_arr[i].data, GL_DYNAMIC_DRAW);
+		}
+		#endif
 	}
 	assert(colt->col_arr[0].pti == PTI_FLAGS);
 	for (unsigned int i = colt->row_count; i < new_row_count; i++)
@@ -124,7 +142,7 @@ oi_t colt_alloc_obj(colt_t* colt)
 	return (oi_t){.colt = colt, .row_index = first_new_index};
 }
 
-const col_t* colt_get_col(const colt_t* colt, pti_t pti)
+col_t* colt_get_col(colt_t* colt, pti_t pti)
 {
 	unsigned int col_index = UINT_MAX;
 	for (unsigned int i = 0; i < colt->col_count; i++)
