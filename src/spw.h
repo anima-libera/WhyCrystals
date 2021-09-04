@@ -37,13 +37,13 @@ struct spw_buffer_t
 };
 typedef struct spw_buffer_t spw_buffer_t;
 
-struct spw_attrib_t
+struct spw_attrib_set_t
 {
 	pti_t pti;
 	unsigned int location_count;
 	GLuint* location_arr;
 };
-typedef struct spw_attrib_t spw_attrib_t;
+typedef struct spw_attrib_set_t spw_attrib_set_t;
 
 /* Shader program wrapper. */
 struct spw_t
@@ -53,8 +53,8 @@ struct spw_t
 	spw_uniform_t* uniform_arr;
 	unsigned int buffer_count;
 	spw_buffer_t* buffer_arr;
-	unsigned int attrib_count;
-	spw_attrib_t* attrib_arr;
+	unsigned int attrib_set_count;
+	spw_attrib_set_t* attrib_set_arr;
 };
 typedef struct spw_t spw_t;
 

@@ -19,16 +19,12 @@ void pos_col_givetoshader(GLuint* attrib_location_arr)
 		sizeof(pos_t), (void*)offsetof(pos_t, x));
 }
 
-void spriteid_col_givetoshader(GLuint* attrib_location_arr)
+void sprite_col_givetoshader(GLuint* attrib_location_arr)
 {
 	glVertexAttribIPointer(attrib_location_arr[0], 1, GL_UNSIGNED_INT,
-		sizeof(spriteid_t), (void*)offsetof(spriteid_t, sprite_id));
-}
-
-void scale_col_givetoshader(GLuint* attrib_location_arr)
-{
-	glVertexAttribPointer(attrib_location_arr[0], 1, GL_FLOAT, GL_FALSE,
-		sizeof(scale_t), (void*)offsetof(scale_t, scale));
+		sizeof(sprite_t), (void*)offsetof(sprite_t, sprite_id));
+	glVertexAttribPointer(attrib_location_arr[1], 1, GL_FLOAT, GL_FALSE,
+		sizeof(sprite_t), (void*)offsetof(sprite_t, scale));
 }
 
 void color_col_givetoshader(GLuint* attrib_location_arr)
@@ -40,8 +36,7 @@ void color_col_givetoshader(GLuint* attrib_location_arr)
 const porp_info_t g_prop_info_table[PROP_TYPE_COUNT] = {
 	[PTI_FLAGS] = FLAGS_INFO,
 	[PTI_POS] = POS_INFO,
-	[PTI_SPRITEID] = SPRITEID_INFO,
-	[PTI_SCALE] = SCALE_INFO,
+	[PTI_SPRITE] = SPRITE_INFO,
 	[PTI_COLOR] = COLOR_INFO,
 };
 

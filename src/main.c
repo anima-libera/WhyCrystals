@@ -299,7 +299,7 @@ int main(int argc, char** argv)
 	/* Player. */
 
 	ptis_t* player_ptis;
-	PTIS_ALLOC_SET(player_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
+	PTIS_ALLOC_SET(player_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITE);
 	colt_t* player_colt = colt_alloc(player_ptis);
 
 	oi_t player_oi;
@@ -314,11 +314,9 @@ int main(int argc, char** argv)
 			.z = 0.0f,
 		};
 
-		spriteid_t* spriteid = obj_get_prop(player_oi, PTI_SPRITEID);
-		spriteid->sprite_id = player_sprite_id_arr[player_sprite_id_index];
-
-		scale_t* scale = obj_get_prop(player_oi, PTI_SCALE);
-		scale->scale = 1.0f;
+		sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
+		sprite->sprite_id = player_sprite_id_arr[player_sprite_id_index];
+		sprite->scale = 1.0f;
 	}
 
 	/* Cursor. */
@@ -342,7 +340,7 @@ int main(int argc, char** argv)
 	/* Trees. */
 
 	ptis_t* tree_ptis;
-	PTIS_ALLOC_SET(tree_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
+	PTIS_ALLOC_SET(tree_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITE);
 	colt_t* tree_colt = colt_alloc(tree_ptis);
 
 	for (unsigned int i = 0; i < 40; i++)
@@ -356,18 +354,16 @@ int main(int argc, char** argv)
 			.z = 0.0f,
 		};
 
-		spriteid_t* spriteid = obj_get_prop(oi, PTI_SPRITEID);
-		spriteid->sprite_id =
+		sprite_t* sprite = obj_get_prop(oi, PTI_SPRITE);
+		sprite->sprite_id =
 			tree_sprite_id_arr[rg_int(g_rg, 0, tree_sprite_number-1)];
-
-		scale_t* scale = obj_get_prop(oi, PTI_SCALE);
-		scale->scale = 1.0f;
+		sprite->scale = 1.0f;
 	}
 
 	/* Animals. */
 
 	ptis_t* animal_ptis;
-	PTIS_ALLOC_SET(animal_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITEID, PTI_SCALE);
+	PTIS_ALLOC_SET(animal_ptis, PTI_FLAGS, PTI_POS, PTI_SPRITE);
 	colt_t* animal_colt = colt_alloc(animal_ptis);
 
 	for (unsigned int i = 0; i < 10; i++)
@@ -381,12 +377,10 @@ int main(int argc, char** argv)
 			.z = 0.0f,
 		};
 
-		spriteid_t* spriteid = obj_get_prop(oi, PTI_SPRITEID);
-		spriteid->sprite_id =
+		sprite_t* sprite = obj_get_prop(oi, PTI_SPRITE);
+		sprite->sprite_id =
 			animal_sprite_id_arr[rg_int(g_rg, 0, animal_sprite_number-1)];
-
-		scale_t* scale = obj_get_prop(oi, PTI_SCALE);
-		scale->scale = 1.0f;
+		sprite->scale = 1.0f;
 	}
 
 	/* Player path. */
@@ -466,8 +460,8 @@ int main(int argc, char** argv)
 			if ((time - walking_animation_start_time) % 10 == 0)
 			{
 				player_sprite_id_index = 1 - player_sprite_id_index;
-				spriteid_t* spriteid = obj_get_prop(player_oi, PTI_SPRITEID);
-				spriteid->sprite_id = player_sprite_id_arr[player_sprite_id_index];
+				sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
+				sprite->sprite_id = player_sprite_id_arr[player_sprite_id_index];
 			}
 
 			pos_t* player_pos = obj_get_prop(player_oi, PTI_POS);
@@ -486,8 +480,8 @@ int main(int argc, char** argv)
 				player_is_moving = 0;
 
 				player_sprite_id_index = 0;
-				spriteid_t* spriteid = obj_get_prop(player_oi, PTI_SPRITEID);
-				spriteid->sprite_id = player_sprite_id_arr[player_sprite_id_index];
+				sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
+				sprite->sprite_id = player_sprite_id_arr[player_sprite_id_index];
 			}
 		}
 

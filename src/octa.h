@@ -52,35 +52,21 @@ void pos_col_givetoshader(GLuint* attrib_location_arr);
 		.is_opengl_synced = 1, \
 	}
 
-/* Sprite id property. */
-struct spriteid_t
+/* Sprite property. */
+struct sprite_t
 {
 	/* The id of a sprite managed by Smata, see Smata for more. */
 	unsigned int sprite_id;
-};
-typedef struct spriteid_t spriteid_t;
-void spriteid_col_givetoshader(GLuint* attrib_location_arr);
-#define SPRITEID_INFO \
-	{ \
-		.name = "spriteid", \
-		.size = sizeof(spriteid_t), \
-		.col_givetoshader_callback = spriteid_col_givetoshader, \
-		.is_opengl_synced = 1, \
-	}
-
-/* Scale property. */
-struct scale_t
-{
-	/* TODO: Document. */
+	/* How scaled will this sprite be displayed. */
 	float scale;
 };
-typedef struct scale_t scale_t;
-void scale_col_givetoshader(GLuint* attrib_location_arr);
-#define SCALE_INFO \
+typedef struct sprite_t sprite_t;
+void sprite_col_givetoshader(GLuint* attrib_location_arr);
+#define SPRITE_INFO \
 	{ \
-		.name = "scale", \
-		.size = sizeof(scale_t), \
-		.col_givetoshader_callback = scale_col_givetoshader, \
+		.name = "sprite", \
+		.size = sizeof(sprite_t), \
+		.col_givetoshader_callback = sprite_col_givetoshader, \
 		.is_opengl_synced = 1, \
 	}
 
@@ -104,8 +90,7 @@ enum pti_t
 {
 	PTI_FLAGS,
 	PTI_POS,
-	PTI_SPRITEID,
-	PTI_SCALE,
+	PTI_SPRITE,
 	PTI_COLOR,
 	PROP_TYPE_COUNT
 };
