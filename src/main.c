@@ -20,6 +20,49 @@
 
 #define TAU 6.28318530717f
 
+/* TODO: Make this better. */
+void swap(unsigned int elem_size, void* arr,
+	unsigned int index_1, unsigned int index_2)
+{
+	char* elem_1 = &((char*)arr)[index_1 * elem_size];
+	char* elem_2 = &((char*)arr)[index_2 * elem_size];
+	char tmp[8];
+	memcpy(tmp, elem_1, elem_size);
+	memcpy(elem_1, elem_2, elem_size);
+	memcpy(elem_2, tmp, elem_size);
+}
+
+/* TODO: Make this better. */
+void shuffle(unsigned int elem_size, unsigned int len, void* arr, rg_t* rg)
+{
+	for (unsigned int i = 0; i < len-1; i++)
+	{
+		swap(elem_size, arr, i, rg_int(rg, i, len-1));
+	}
+}
+
+struct anim_step_t
+{
+	unsigned int sprite_id;
+	unsigned int duration;
+};
+typedef struct anim_step_t anim_step_t;
+
+struct anim_t
+{
+	unsigned int step_count;
+	anim_step_t* step_arr;
+	unsigned int total_duration;
+};
+typedef struct anim_t anim_t;
+
+struct animal_terminal_type_t
+{
+	unsigned int standing_sprite_id;
+	anim_t walking_anim;
+};
+typedef struct animal_terminal_type_t animal_terminal_type_t;
+
 int main(int argc, char** argv)
 {
 	/* Command line argument handling. */
@@ -41,12 +84,12 @@ int main(int argc, char** argv)
 	{
 		size_t write(int fd, const void* buf, size_t count);
 
-		rg_t* g_rg = malloc(sizeof(rg_t));
-		rg_time_seed(g_rg);
+		rg_t* rg = malloc(sizeof(rg_t));
+		rg_time_seed(rg);
 		uint32_t buf32;
 		while (1)
 		{
-			buf32 = rg_uint32_full(g_rg);
+			buf32 = rg_uint32_full(rg);
 			write(1, &buf32, 4);
 		}
 		return 0;
@@ -74,8 +117,8 @@ int main(int argc, char** argv)
 	SDL_GL_GetDrawableSize(g_window, &window_width, &window_height);
 	swp_update_window_wh(window_width, window_height);
 
-	rg_t* g_rg = malloc(sizeof(rg_t));
-	rg_time_seed(g_rg);
+	rg_t* rg = malloc(sizeof(rg_t));
+	rg_time_seed(rg);
 
 	if (init_smata() != 0)
 	{
@@ -107,9 +150,9 @@ int main(int argc, char** argv)
 		for (unsigned int y = 0; y < CISR.h; y++)
 		{
 			canvas.data[x + canvas.w * y] = (pixel_t){
-				.r = rg_int(g_rg, 100, 255),
-				.g = rg_int(g_rg, 0, 255),
-				.b = rg_int(g_rg, 0, 100),
+				.r = rg_int(rg, 100, 255),
+				.g = rg_int(rg, 0, 255),
+				.b = rg_int(rg, 0, 100),
 				.a = 255
 			};
 		}
@@ -181,73 +224,179 @@ int main(int argc, char** argv)
 
 	/* Tree sprites. */
 
-	unsigned int tree_sprite_number = rg_int(g_rg, 1, 6);
+	#if 0
+	long long int hh[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 876};
+	shuffle(sizeof(long long int), sizeof(hh)/sizeof(long long int), hh, rg);
+	for (unsigned int i = 0; i < sizeof(hh)/sizeof(long long int); i++)
+	{
+		printf("%d ", hh[i]);
+	}
+	printf("\n");
+	return 0;
+	#endif
+
+	unsigned int tree_sprite_number = rg_int(rg, 1, 6);
 	unsigned int tree_sprite_id_arr[tree_sprite_number];
 	{
 		for (unsigned int i = 0; i < tree_sprite_number; i++)
 		{
 			memset(canvas.data, 0, canvas.w * canvas.h * sizeof(pixel_t));
 
-			unsigned int w = rg_int(g_rg, 1, 3) * 2 + 1;
-			unsigned int h_bottom = rg_int(g_rg, 2, 6);
-			unsigned int h_top = w < 5 ? w : rg_int(g_rg, 0, 3) == 0 ? (w-1) : w;
-			int has_plus_shape = w >= 5 ? rg_int(g_rg, 0, 2) == 0 : 0;
-
-			pixel_t bottom_color = {
-				.r = rg_int(g_rg, 70, 255),
-				.g = rg_int(g_rg, 0, 100),
-				.b = rg_int(g_rg, 0, 70),
-				.a = 255,
-			};
-			pixel_t top_color = {
-				.r = rg_int(g_rg, 0, 200),
-				.g = rg_int(g_rg, 80, 255),
-				.b = rg_int(g_rg, 0, 100),
-				.a = 255,
-			};
-
-			CISR.x = 0;
-			CISR.y = 0;
-			CISR.w = w;
-			CISR.h = h_bottom + h_top;
-			CISR.origin_x = 0.5f;
-			CISR.origin_y = 0.0f;
-			CISR.flags.bit_set.vertical = 1;
-
-			for (unsigned int y = h_top; y < h_bottom + h_top; y++)
+			if (rg_int(rg, 0, 4) == 0)
 			{
+				/* Strange tree. */
+
+				pixel_t color;
+				{
+					unsigned char value_arr[3];
+					#define CHANNEL_HEIGH 0
+					value_arr[CHANNEL_HEIGH] = rg_int(rg, 200, 255);
+					#define CHANNEL_LOW 1
+					value_arr[CHANNEL_LOW] = rg_int(rg, 0, 50);
+					#define CHANNEL_RANDOM 2
+					value_arr[CHANNEL_RANDOM] = rg_int(rg, 0, 255);
+					unsigned int channel_table[3] =
+						{CHANNEL_HEIGH, CHANNEL_LOW, CHANNEL_RANDOM};
+					shuffle(sizeof(unsigned int), 3, channel_table, rg);
+					color.r = value_arr[channel_table[0]];
+					color.g = value_arr[channel_table[1]];
+					color.b = value_arr[channel_table[2]];
+					color.a = 255;
+				}
+
+				unsigned int w = 9;
+				unsigned int h = 15;
+
 				unsigned int x = w / 2;
-				canvas.data[x + canvas.w * y] = bottom_color;
+				assert(x % 2 == 0);
+				unsigned int y = h-1;
+				unsigned int length = rg_int(rg, 2, h-1 /* Why -1 ??! */);
+
+				unsigned int min_x = x, max_x = x, init_x = x;
+				unsigned int min_y = y;
+
+				for (unsigned int j = 0; 1; j++)
+				{
+					if (x < min_x)
+					{
+						min_x = x;
+					}
+					else if (x > max_x)
+					{
+						max_x = x;
+					}
+					if (y < min_y)
+					{
+						min_y = y;
+					}
+
+					canvas.data[x + canvas.w * y] = color;
+					if (!(j < length))
+					{
+						break;
+					}
+
+					int delta_x = rg_int(rg, -1, 1);
+					if (x == 0 && delta_x < 0)
+					{
+						delta_x = 0;
+					}
+					else if ((x == w-1) && delta_x > 0)
+					{
+						delta_x = 0;
+					}
+					if ((unsigned int)rg_int(rg, 0, length) > j)
+					{
+						delta_x = 0;
+					}
+					x += delta_x;
+
+					assert(y >= 1);
+					y--;
+				}
+
+				CISR.x = min_x;
+				CISR.y = min_y;
+				CISR.w = max_x - min_x + 1;
+				CISR.h = h - min_y;
+				CISR.origin_x = ((float)(init_x - min_x) + 0.5f) / (float)(CISR.w);
+				CISR.origin_y = 0.0f;
+				CISR.flags.bit_set.vertical = 1;
 			}
-			for (unsigned int x = 0; x < w; x++)
-			for (unsigned int y = 0; y < h_top; y++)
+			else
 			{
-				canvas.data[x + canvas.w * y] = top_color;
-			}
-			if (has_plus_shape)
-			{
-				unsigned int x, y;
-				x = 0;
-				y = 0;
-				canvas.data[x + canvas.w * y] = (pixel_t){0};
-				x = w-1;
-				y = 0;
-				canvas.data[x + canvas.w * y] = (pixel_t){0};
-				x = 0;
-				y = h_top-1;
-				canvas.data[x + canvas.w * y] = (pixel_t){0};
-				x = w-1;
-				y = h_top-1;
-				canvas.data[x + canvas.w * y] = (pixel_t){0};
+				/* Normal tree. */
+
+				unsigned int w = rg_int(rg, 1, 3) * 2 + 1;
+				unsigned int h_bottom = rg_int(rg, 2, 6);
+				unsigned int h_top = w < 5 ? w : rg_int(rg, 0, 3) == 0 ? (w-1) : w;
+				int has_plus_shape = w >= 5 ? rg_int(rg, 0, 2) == 0 : 0;
+
+				pixel_t bottom_color = {
+					.r = rg_int(rg, 70, 255),
+					.g = rg_int(rg, 0, 100),
+					.b = rg_int(rg, 0, 70),
+					.a = 255,
+				};
+				pixel_t top_color = {
+					.r = rg_int(rg, 0, 200),
+					.g = rg_int(rg, 80, 255),
+					.b = rg_int(rg, 0, 100),
+					.a = 255,
+				};
+
+				CISR.x = 0;
+				CISR.y = 0;
+				CISR.w = w;
+				CISR.h = h_bottom + h_top;
+				CISR.origin_x = 0.5f;
+				CISR.origin_y = 0.0f;
+				CISR.flags.bit_set.vertical = 1;
+
+				for (unsigned int y = h_top; y < h_bottom + h_top; y++)
+				{
+					unsigned int x = w / 2;
+					canvas.data[x + canvas.w * y] = bottom_color;
+				}
+				for (unsigned int x = 0; x < w; x++)
+				for (unsigned int y = 0; y < h_top; y++)
+				{
+					canvas.data[x + canvas.w * y] = top_color;
+				}
+				if (has_plus_shape)
+				{
+					unsigned int x, y;
+					x = 0;
+					y = 0;
+					canvas.data[x + canvas.w * y] = (pixel_t){0};
+					x = w-1;
+					y = 0;
+					canvas.data[x + canvas.w * y] = (pixel_t){0};
+					x = 0;
+					y = h_top-1;
+					canvas.data[x + canvas.w * y] = (pixel_t){0};
+					x = w-1;
+					y = h_top-1;
+					canvas.data[x + canvas.w * y] = (pixel_t){0};
+				}
 			}
 
 			tree_sprite_id_arr[i] = smata_register_sprite(&canvas);
 		}
 	}
 
+	/* Animal types. */
+
+	unsigned int animal_terminal_type_number = rg_int(rg, 1, 4);
+	animal_terminal_type_t animal_terminal_type_arr[animal_terminal_type_number];
+	for (unsigned int i = 0; i < animal_terminal_type_number; i++)
+	{
+		/* TODO */
+	}
+
 	/* Animal sprites. */
 
-	unsigned int animal_sprite_number = rg_int(g_rg, 1, 4);
+	unsigned int animal_sprite_number = rg_int(rg, 1, 4);
 	unsigned int animal_sprite_id_arr[animal_sprite_number];
 	{
 		for (unsigned int i = 0; i < animal_sprite_number; i++)
@@ -255,16 +404,16 @@ int main(int argc, char** argv)
 			memset(canvas.data, 0, canvas.w * canvas.h * sizeof(pixel_t));
 
 			unsigned int w = 3;
-			unsigned int h = 3;
+			unsigned int h = rg_int(rg, 2, 3);
 
 			pixel_t color;
 			unsigned int color_channel_sum;
 			do
 			{
 				color = (pixel_t){
-					.r = rg_int(g_rg, 0, 255),
-					.g = rg_int(g_rg, 0, 255),
-					.b = rg_int(g_rg, 0, 255),
+					.r = rg_int(rg, 0, 255),
+					.g = rg_int(rg, 0, 255),
+					.b = rg_int(rg, 0, 255),
 					.a = 255,
 				};
 				color_channel_sum = color.r + color.g + color.b;
@@ -281,15 +430,21 @@ int main(int argc, char** argv)
 			#define PAINT(x_, y_) canvas.data[(x_) + canvas.w * (y_)] = color
 
 			/* @ @ @ *
-			 * @ . @ *
 			 * @ . @ */
-			PAINT(0, 2);
 			PAINT(0, 1);
 			PAINT(0, 0);
 			PAINT(1, 0);
 			PAINT(2, 0);
 			PAINT(2, 1);
-			PAINT(2, 2);
+
+			if (h == 3)
+			{
+				/* @ @ @ *
+				 * @ . @ *
+				 * @ . @ */
+				PAINT(0, 2);
+				PAINT(2, 2);
+			}
 
 			#undef PAINT
 
@@ -349,20 +504,20 @@ int main(int argc, char** argv)
 
 		pos_t* pos = obj_get_prop(oi, PTI_POS);
 		*pos = (pos_t){
-			.x = rg_float(g_rg, -6.5f, 6.5f),
-			.y = rg_float(g_rg, -3.0f, 3.0f),
+			.x = rg_float(rg, -6.5f, 6.5f),
+			.y = rg_float(rg, -3.0f, 3.0f),
 			.z = 0.0f,
 		};
 
 		sprite_t* sprite = obj_get_prop(oi, PTI_SPRITE);
 		sprite->sprite_id =
-			tree_sprite_id_arr[rg_int(g_rg, 0, tree_sprite_number-1)];
+			tree_sprite_id_arr[rg_int(rg, 0, tree_sprite_number-1)];
 		sprite->scale = 1.0f;
 	}
 
 	/* Animals colt. */
 
-	ptis_t* animal_ptis = PTIS_ALLOC(PTI_FLAGS, PTI_POS, PTI_SPRITE, PTI_WALK_PATH);
+	ptis_t* animal_ptis = PTIS_ALLOC(PTI_FLAGS, PTI_POS, PTI_SPRITE, PTI_WALK);
 	colt_t* animal_colt = colt_alloc(animal_ptis);
 
 	for (unsigned int i = 0; i < 10; i++)
@@ -371,20 +526,20 @@ int main(int argc, char** argv)
 
 		pos_t* pos = obj_get_prop(oi, PTI_POS);
 		*pos = (pos_t){
-			.x = rg_float(g_rg, -6.5f, 6.5f),
-			.y = rg_float(g_rg, -3.0f, 3.0f),
+			.x = rg_float(rg, -6.5f, 6.5f),
+			.y = rg_float(rg, -3.0f, 3.0f),
 			.z = 0.0f,
 		};
 
 		sprite_t* sprite = obj_get_prop(oi, PTI_SPRITE);
 		sprite->sprite_id =
-			animal_sprite_id_arr[rg_int(g_rg, 0, animal_sprite_number-1)];
+			animal_sprite_id_arr[rg_int(rg, 0, animal_sprite_number-1)];
 		sprite->scale = 1.0f;
 
-		walk_path_t* walk_path = obj_get_prop(oi, PTI_WALK_PATH);
-		*walk_path = (walk_path_t){
+		walk_t* walk = obj_get_prop(oi, PTI_WALK);
+		*walk = (walk_t){
 			.is_moving = 0,
-			.motion_factor = 0.05f,
+			.motion_factor = 0.02f,
 			.target_x = pos->x,
 			.target_y = pos->y,
 			.motion_x = 0.0f,
@@ -468,20 +623,20 @@ int main(int argc, char** argv)
 
 								pos_t* pos = obj_get_prop(oi, PTI_POS);
 								*pos = (pos_t){
-									.x = rg_float(g_rg, -6.5f, 6.5f),
-									.y = rg_float(g_rg, -3.0f, 3.0f),
+									.x = rg_float(rg, -6.5f, 6.5f),
+									.y = rg_float(rg, -3.0f, 3.0f),
 									.z = 0.0f,
 								};
 
 								sprite_t* sprite = obj_get_prop(oi, PTI_SPRITE);
 								sprite->sprite_id =
-									animal_sprite_id_arr[rg_int(g_rg, 0, animal_sprite_number-1)];
+									animal_sprite_id_arr[rg_int(rg, 0, animal_sprite_number-1)];
 								sprite->scale = 1.0f;
 
-								walk_path_t* walk_path = obj_get_prop(oi, PTI_WALK_PATH);
-								*walk_path = (walk_path_t){
+								walk_t* walk = obj_get_prop(oi, PTI_WALK);
+								*walk = (walk_t){
 									.is_moving = 0,
-									.motion_factor = 0.05f,
+									.motion_factor = 0.02f,
 									.target_x = pos->x,
 									.target_y = pos->y,
 									.motion_x = 0.0f,
@@ -528,7 +683,7 @@ int main(int argc, char** argv)
 
 		const col_t* animal_col_flags = colt_get_col(animal_colt, PTI_FLAGS);
 		col_t* animal_col_pos = colt_get_col(animal_colt, PTI_POS);
-		col_t* animal_col_walk_path = colt_get_col(animal_colt, PTI_WALK_PATH);
+		col_t* animal_col_walk = colt_get_col(animal_colt, PTI_WALK);
 		for (unsigned int row_index = 0; row_index < animal_colt->row_count; row_index++)
 		{
 			const flags_t* flags = &((flags_t*)animal_col_flags->data)[row_index];
@@ -538,41 +693,41 @@ int main(int argc, char** argv)
 			}
 
 			pos_t* pos = &((pos_t*)animal_col_pos->data)[row_index];
-			walk_path_t* walk_path = &((walk_path_t*)animal_col_walk_path->data)[row_index];
+			walk_t* walk = &((walk_t*)animal_col_walk->data)[row_index];
 			
-			if (walk_path->is_moving)
+			if (walk->is_moving)
 			{
-				pos->x += walk_path->motion_x;
-				pos->y += walk_path->motion_y;
+				pos->x += walk->motion_x;
+				pos->y += walk->motion_y;
 
-				const float previous_square_dist_to_target = walk_path->square_dist_to_target;
-				walk_path->square_dist_to_target =
-					squaref(pos->x - walk_path->target_x) +
-					squaref(pos->y - walk_path->target_y);
-				if (walk_path->square_dist_to_target >= previous_square_dist_to_target)
+				const float previous_square_dist_to_target = walk->square_dist_to_target;
+				walk->square_dist_to_target =
+					squaref(pos->x - walk->target_x) +
+					squaref(pos->y - walk->target_y);
+				if (walk->square_dist_to_target >= previous_square_dist_to_target)
 				{
-					pos->x = walk_path->target_x;
-					pos->y = walk_path->target_y;
+					pos->x = walk->target_x;
+					pos->y = walk->target_y;
 
-					walk_path->is_moving = 0;
+					walk->is_moving = 0;
 				}
 			}
-			else if (rg_int(g_rg, 0, 1000) == 0)
+			else if (rg_int(rg, 0, 400) == 0)
 			{
-				float dist = rg_float(g_rg, 0.5f, 1.5f);
-				float angle = rg_float(g_rg, 0.0f, TAU);
+				float dist = rg_float(rg, 0.5f, 1.5f);
+				float angle = rg_float(rg, 0.0f, TAU);
 
-				walk_path->target_x = pos->x + cosf(angle) * dist;
-				walk_path->target_y = pos->y + sinf(angle) * dist;
+				walk->target_x = pos->x + cosf(angle) * dist;
+				walk->target_y = pos->y + sinf(angle) * dist;
 
-				walk_path->square_dist_to_target =
-					squaref(pos->x - walk_path->target_x) +
-					squaref(pos->y - walk_path->target_y);
+				walk->square_dist_to_target =
+					squaref(pos->x - walk->target_x) +
+					squaref(pos->y - walk->target_y);
 
-				walk_path->motion_x = cosf(angle) * walk_path->motion_factor;
-				walk_path->motion_y = sinf(angle) * walk_path->motion_factor;
+				walk->motion_x = cosf(angle) * walk->motion_factor;
+				walk->motion_y = sinf(angle) * walk->motion_factor;
 
-				walk_path->is_moving = 1;
+				walk->is_moving = 1;
 			}
 		}
 

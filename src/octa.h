@@ -86,7 +86,7 @@ void color_col_givetoshader(GLuint* attrib_location_arr);
 	}
 
 /* Able to walk property. */
-struct walk_path_t
+struct walk_t
 {
 	int is_moving;
 	float motion_factor;
@@ -95,11 +95,11 @@ struct walk_path_t
 	float square_dist_to_target;
 	unsigned int walking_animation_start_time;
 };
-typedef struct walk_path_t walk_path_t;
-#define WALK_PATH_INFO \
+typedef struct walk_t walk_t;
+#define WALK_INFO \
 	{ \
-		.name = "walk_path", \
-		.size = sizeof(walk_path_t), \
+		.name = "walk", \
+		.size = sizeof(walk_t), \
 		.col_givetoshader_callback = NULL, \
 		.attrib_count = 0, \
 	}
@@ -111,7 +111,7 @@ enum pti_t
 	PTI_POS,
 	PTI_SPRITE,
 	PTI_COLOR,
-	PTI_WALK_PATH,
+	PTI_WALK,
 	PROP_TYPE_COUNT
 };
 typedef enum pti_t pti_t;
@@ -135,16 +135,6 @@ struct ptis_t
 	pti_t arr[]; /* Should be sorted. */
 };
 typedef struct ptis_t ptis_t;
-#if 0
-#define PTIS_ALLOC_SET(pti_ptr_, ...) \
-	do \
-	{ \
-		const pti_t pti_array[] = {__VA_ARGS__}; \
-		pti_ptr_ = malloc(sizeof(ptis_t) + sizeof(pti_array)); \
-		pti_ptr_->len = sizeof(pti_array) / sizeof(pti_t); \
-		memcpy(&pti_ptr_->arr, pti_array, sizeof(pti_array)); \
-	} while (0)
-#endif
 #define PTIS_ALLOC(...) \
 	malloc_memcpy_2( \
 		sizeof(ptis_t), \

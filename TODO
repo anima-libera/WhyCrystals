@@ -1,9 +1,10 @@
 
 - Add a flag on sprite ids or something to mirror the sprite along the y axis
 
-- Make animals move around (a bit like the player can)
-  by adding a property that contains the motion data
-- Add a shader to display the motion data for debuging
+- Add a shader to display the waking path for debuging
+- Add a shader to display the rectange of sprites
+- Add a renderer that colors the pixels according to the z value
+- Add a way to emit smata's atlas
 
 - Add the concept of displayer, which can be a collection of shaders
   that can all be applied all at once on colts, or something like that,
@@ -18,9 +19,7 @@
 
 - Make a practical (and optimized) way to store and apply shaders on single
   objects (such as the player, or the cursor, etc.)
-- Add 0-sized properties (aka tag components)
-
-- Add a renderer that colors the pixels according to the z value
+- Maybe add maybe 0-sized properties maybe (aka tag components maybe) maybe
 
 - Consider adding the possibility for shaders to do instancing,
   ie rendering a maybe complex model a bunch of times
