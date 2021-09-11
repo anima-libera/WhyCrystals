@@ -23,7 +23,7 @@ int init_smata(void)
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, g_smata.atlas_id);
-	swp_update_atlas(0);
+	spw_update_atlas(0);
 
 	glGenBuffers(1, &g_smata.sr_buffer_opengl_id);
 	glBindBuffer(GL_ARRAY_BUFFER, g_smata.sr_buffer_opengl_id);
@@ -89,12 +89,11 @@ unsigned int smata_register_sprite(canvas_t* canvas)
 		0, 0, ATLAS_SIDE, ATLAS_SIDE,
 		GL_RGBA, GL_UNSIGNED_BYTE, g_smata.atlas_data);
 	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	swp_update_atlas(0);
+	spw_update_atlas(0);
 
 	unsigned int next_new_index = g_smata.sr_len;
 	DA_LENGTHEN(g_smata.sr_len += 1, g_smata.sr_cap, g_smata.sr_arr,
 		sprite_rect_t);
-	fprintf(stderr, "to (len = %u)\n", g_smata.sr_len);
 	g_smata.sr_arr[next_new_index] = inatlas_sprite_rect;
 
 	glBindBuffer(GL_ARRAY_BUFFER, g_smata.sr_buffer_opengl_id);

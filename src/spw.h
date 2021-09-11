@@ -66,10 +66,10 @@ enum spw_id_t
 };
 typedef enum spw_id_t spw_id_t;
 extern spw_t g_spw_table[SPW_COUNT];
-int init_swp_table(void);
-void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt);
+int init_spw_table(void);
+void spw_apply_on_colt(spw_id_t spw_id, colt_t* colt);
 
-void swp_update_atlas(unsigned int texture_unit_id);
-void swp_update_window_wh(unsigned int w, unsigned int h);
+void spw_update_atlas(unsigned int texture_unit_id);
+void spw_update_window_wh(unsigned int w, unsigned int h);
 
 #endif /* WHYCRYSTALS_HEADER_SPW__ */

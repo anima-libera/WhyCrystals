@@ -11,11 +11,11 @@
 
 spw_t g_spw_table[SPW_COUNT] = {0};
 
-int init_swp_table(void)
+int init_spw_table(void)
 {
 	#define UNIFORM(whichone_, location_) \
 		((spw_uniform_t){.whichone = whichone_, .location = location_})
-	#define SWP_DECLARE_UNIFORMS(index_, ...) \
+	#define SPW_DECLARE_UNIFORMS(index_, ...) \
 		do \
 		{ \
 			const spw_uniform_t uniform_array[] = {__VA_ARGS__}; \
@@ -28,7 +28,7 @@ int init_swp_table(void)
 
 	#define BUFFER(whichone_, binding_) \
 		((spw_buffer_t){.whichone = whichone_, .binding = binding_})
-	#define SWP_DECLARE_BUFFERS(index_, ...) \
+	#define SPW_DECLARE_BUFFERS(index_, ...) \
 		do \
 		{ \
 			const spw_buffer_t buffer_array[] = {__VA_ARGS__}; \
@@ -44,7 +44,7 @@ int init_swp_table(void)
 			.pti = pti_, \
 			.location_count = ARGS_COUNT(__VA_ARGS__), \
 			.location_arr = ARGS_ALLOCATED(GLuint, __VA_ARGS__)})
-	#define SWP_DECLARE_ATTRIB_SETS(index_, ...) \
+	#define SPW_DECLARE_ATTRIB_SETS(index_, ...) \
 		do \
 		{ \
 			const spw_attrib_set_t attrib_set_array[] = {__VA_ARGS__}; \
@@ -56,34 +56,34 @@ int init_swp_table(void)
 		} while (0)
 
 	{
-		unsigned int swp_id = SPW_ID_POS;
-		g_spw_table[swp_id].shprog_id = g_shprog_draw_pos;
-		SWP_DECLARE_UNIFORMS(swp_id,
+		unsigned int spw_id = SPW_ID_POS;
+		g_spw_table[spw_id].shprog_id = g_shprog_draw_pos;
+		SPW_DECLARE_UNIFORMS(spw_id,
 			UNIFORM(U_WINDOW_WH, 1));
-		SWP_DECLARE_ATTRIB_SETS(swp_id,
+		SPW_DECLARE_ATTRIB_SETS(spw_id,
 			ATTRIB_SET(PTI_FLAGS, 0),
 			ATTRIB_SET(PTI_POS, 1));
 	}
 	{
-		unsigned int swp_id = SPW_ID_SPRITE;
-		g_spw_table[swp_id].shprog_id = g_shprog_draw_sprite;
-		SWP_DECLARE_UNIFORMS(swp_id,
+		unsigned int spw_id = SPW_ID_SPRITE;
+		g_spw_table[spw_id].shprog_id = g_shprog_draw_sprite;
+		SPW_DECLARE_UNIFORMS(spw_id,
 			UNIFORM(U_ATLAS, 0),
 			UNIFORM(U_WINDOW_WH, 1));
-		SWP_DECLARE_BUFFERS(swp_id,
+		SPW_DECLARE_BUFFERS(spw_id,
 			BUFFER(B_SMATA_SPRITE_RECTS, 0));
-		SWP_DECLARE_ATTRIB_SETS(swp_id,
+		SPW_DECLARE_ATTRIB_SETS(spw_id,
 			ATTRIB_SET(PTI_FLAGS, 0),
 			ATTRIB_SET(PTI_POS, 1),
 			ATTRIB_SET(PTI_SPRITE, 2, 3));
 	}
 
 	#undef UNIFORM
-	#undef SWP_DECLARE_UNIFORMS
+	#undef SPW_DECLARE_UNIFORMS
 	#undef BUFFER
-	#undef SWP_DECLARE_BUFFERS
+	#undef SPW_DECLARE_BUFFERS
 	#undef ATTRIB_SET
-	#undef SWP_DECLARE_ATTRIB_SETS
+	#undef SPW_DECLARE_ATTRIB_SETS
 
 	return 0;
 }
@@ -99,7 +99,7 @@ static GLuint get_buffer_openglid(spw_buffer_whichone_t whichone)
 	}
 }
 
-void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt)
+void spw_apply_on_colt(spw_id_t spw_id, colt_t* colt)
 {
 	glUseProgram(g_spw_table[spw_id].shprog_id);
 
@@ -168,7 +168,7 @@ void swp_apply_on_colt(spw_id_t spw_id, colt_t* colt)
 	glUseProgram((GLuint)0);
 }
 
-void swp_update_atlas(unsigned int texture_unit_id)
+void spw_update_atlas(unsigned int texture_unit_id)
 {
 	for (unsigned int i = 0; i < SPW_COUNT; i++)
 	{
@@ -185,7 +185,7 @@ void swp_update_atlas(unsigned int texture_unit_id)
 	}
 }
 
-void swp_update_window_wh(unsigned int w, unsigned int h)
+void spw_update_window_wh(unsigned int w, unsigned int h)
 {
 	for (unsigned int i = 0; i < SPW_COUNT; i++)
 	{

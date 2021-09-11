@@ -87,8 +87,8 @@ static void GLAPIENTRY opengl_dbgmsg_callback(
 	const GLchar* message, const void* user_param)
 {
 	(void)length; (void)user_param;
-	#ifndef DEBUG
-		/* Filter out non-error debug messages if not in a debug build. */
+	#ifndef ENABLE_OPENGL_NOTIFICATIONS
+		/* Filter out non-error debug messages if not opted-in. */
 		if (type != GL_DEBUG_TYPE_ERROR) return;
 		/* Note: The printing of non-error debug messages will looks like
 		 * > OpenGL dbgmsg (NOTIFICATION severity) API:OTHER(131185)

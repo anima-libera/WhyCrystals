@@ -93,7 +93,6 @@ struct walk_t
 	float target_x, target_y;
 	float motion_x, motion_y;
 	float square_dist_to_target;
-	unsigned int walking_animation_start_time;
 };
 typedef struct walk_t walk_t;
 #define WALK_INFO \

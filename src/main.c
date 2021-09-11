@@ -44,7 +44,7 @@ void shuffle(unsigned int elem_size, unsigned int len, void* arr, rg_t* rg)
 struct anim_step_t
 {
 	unsigned int sprite_id;
-	unsigned int duration;
+	unsigned int next_step_start_time;
 };
 typedef struct anim_step_t anim_step_t;
 
@@ -52,9 +52,60 @@ struct anim_t
 {
 	unsigned int step_count;
 	anim_step_t* step_arr;
-	unsigned int total_duration;
+	unsigned int initial_inanim_time;
+	unsigned int initial_step_index;
 };
 typedef struct anim_t anim_t;
+
+struct anim_state_t
+{
+	const anim_t* anim;
+	unsigned int inanim_time;
+	unsigned int step_index;
+};
+typedef struct anim_state_t anim_state_t;
+
+void anim_start(anim_state_t* anim_state, const anim_t* anim,
+	unsigned int* target_sprite_id)
+{
+	*anim_state = (anim_state_t){
+		.anim = anim,
+		.inanim_time = anim->initial_inanim_time,
+		.step_index = anim->initial_step_index,
+	};
+	*target_sprite_id = anim->step_arr[anim->initial_step_index].sprite_id;
+}
+
+void anim_iterate(anim_state_t* anim_state, unsigned int* target_sprite_id)
+{
+	const anim_t* anim = anim_state->anim;
+	if (anim == NULL)
+	{
+		return;
+	}
+
+	const unsigned int previous_step_index = anim_state->step_index;
+	const unsigned int nsst =
+		anim->step_arr[anim_state->step_index].next_step_start_time;
+	//const unsigned int total_duration = 
+	//	anim->step_arr[anim->step_count-1].next_step_start_time;
+
+	anim_state->inanim_time++;
+	if (anim_state->inanim_time >= nsst)
+	{
+		anim_state->step_index++;
+		if (anim_state->step_index >= anim->step_count)
+		{
+			anim_state->step_index = 0;
+			anim_state->inanim_time = 0;
+		}
+	}
+
+	if (previous_step_index != anim_state->step_index)
+	{
+		*target_sprite_id = anim->step_arr[anim_state->step_index].sprite_id;
+	}
+}
 
 struct animal_terminal_type_t
 {
@@ -108,14 +159,14 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (init_swp_table() != 0)
+	if (init_spw_table() != 0)
 	{
 		return -1;
 	}
 
 	int window_width, window_height;
 	SDL_GL_GetDrawableSize(g_window, &window_width, &window_height);
-	swp_update_window_wh(window_width, window_height);
+	spw_update_window_wh(window_width, window_height);
 
 	rg_t* rg = malloc(sizeof(rg_t));
 	rg_time_seed(rg);
@@ -545,7 +596,6 @@ int main(int argc, char** argv)
 			.motion_x = 0.0f,
 			.motion_y = 0.0f,
 			.square_dist_to_target = 0.0f,
-			.walking_animation_start_time = 0,
 		};
 	}
 
@@ -558,7 +608,26 @@ int main(int argc, char** argv)
 	float player_motion_x, player_motion_y;
 	float square_dist_to_target;
 
-	unsigned int walking_animation_start_time;
+	anim_step_t player_anim_walking_step_arr[] = {
+		{
+			.sprite_id = player_sprite_id_arr[0],
+			.next_step_start_time = 10,
+		},
+		{
+			.sprite_id = player_sprite_id_arr[1],
+			.next_step_start_time = 20,
+		},
+	};
+	anim_t player_anim_walking = {
+		.step_count = 2,
+		.step_arr = player_anim_walking_step_arr,
+		.initial_inanim_time = 10,
+		.initial_step_index = 1,
+	};
+
+	anim_state_t player_anim_state = {
+		.anim = NULL,
+	};
 
 	/* h */
 
@@ -604,7 +673,11 @@ int main(int argc, char** argv)
 						square_dist_to_target =
 							squaref(player_pos->x - player_target_x) +
 							squaref(player_pos->y - player_target_y);
-						walking_animation_start_time = time;
+						if (player_anim_state.anim != &player_anim_walking)
+						{
+							sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
+							anim_start(&player_anim_state, &player_anim_walking, &sprite->sprite_id);
+						}
 					}
 				break;
 				case SDL_KEYDOWN:
@@ -642,7 +715,6 @@ int main(int argc, char** argv)
 									.motion_x = 0.0f,
 									.motion_y = 0.0f,
 									.square_dist_to_target = 0.0f,
-									.walking_animation_start_time = 0,
 								};
 							}
 						break;
@@ -651,15 +723,13 @@ int main(int argc, char** argv)
 			}
 		}
 
+		{
+			sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
+			anim_iterate(&player_anim_state, &sprite->sprite_id);
+		}
+
 		if (player_is_moving)
 		{
-			if ((time - walking_animation_start_time) % 10 == 0)
-			{
-				player_sprite_id_index = 1 - player_sprite_id_index;
-				sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
-				sprite->sprite_id = player_sprite_id_arr[player_sprite_id_index];
-			}
-
 			pos_t* player_pos = obj_get_prop(player_oi, PTI_POS);
 			player_pos->x += player_motion_x;
 			player_pos->y += player_motion_y;
@@ -678,6 +748,8 @@ int main(int argc, char** argv)
 				player_sprite_id_index = 0;
 				sprite_t* sprite = obj_get_prop(player_oi, PTI_SPRITE);
 				sprite->sprite_id = player_sprite_id_arr[player_sprite_id_index];
+
+				player_anim_state.anim = NULL;
 			}
 		}
 
@@ -734,18 +806,18 @@ int main(int argc, char** argv)
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		swp_apply_on_colt(SPW_ID_POS, cursor_colt);
+		spw_apply_on_colt(SPW_ID_POS, cursor_colt);
 
-		swp_apply_on_colt(SPW_ID_SPRITE, tree_colt);
-		swp_apply_on_colt(SPW_ID_SPRITE, animal_colt);
-		swp_apply_on_colt(SPW_ID_SPRITE, player_colt);
+		spw_apply_on_colt(SPW_ID_SPRITE, tree_colt);
+		spw_apply_on_colt(SPW_ID_SPRITE, animal_colt);
+		spw_apply_on_colt(SPW_ID_SPRITE, player_colt);
 
 		if (display_positions)
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
-			swp_apply_on_colt(SPW_ID_POS, tree_colt);
-			swp_apply_on_colt(SPW_ID_POS, animal_colt);
-			swp_apply_on_colt(SPW_ID_POS, player_colt);
+			spw_apply_on_colt(SPW_ID_POS, tree_colt);
+			spw_apply_on_colt(SPW_ID_POS, animal_colt);
+			spw_apply_on_colt(SPW_ID_POS, player_colt);
 		}
 
 		SDL_GL_SwapWindow(g_window);

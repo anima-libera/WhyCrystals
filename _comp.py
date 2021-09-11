@@ -46,6 +46,7 @@ def cmdline_has_option(*option_names):
 	return False
 option_help = cmdline_has_option("-h", "--help")
 option_debug = cmdline_has_option("-d", "--debug")
+option_opengl_notifications = cmdline_has_option("--opengl-notifications")
 release_build = not option_debug
 src_dir_name = "src"
 bin_dir_name = "bin"
@@ -141,6 +142,8 @@ if release_build:
 	build_command_args.append("-O2")
 	build_command_args.append("-fno-stack-protector")
 	build_command_args.append("-flto")
+if option_opengl_notifications:
+	build_command_args.append("-DENABLE_OPENGL_NOTIFICATIONS")
 build_command_args.append("-lGL")
 build_command_args.append("-DGLEW_STATIC")
 build_command_args.append("-lGLEW")
