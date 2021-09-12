@@ -21,10 +21,20 @@ struct flags_bit_set_t
 	#define OBJ_FLAG_EXISTS (1 << 0)
 };
 typedef struct flags_bit_set_t flags_bit_set_t;
+struct flags_unexisting_t
+{
+	unsigned int exists_flag: 1;
+	unsigned int octa_number: 31; /* Used by Octa for optimized allocation. */
+};
+typedef struct flags_unexisting_t flags_unexisting_t;
 union flags_t
 {
 	unsigned int plain;
 	flags_bit_set_t bit_set;
+	/* If the exists bit is 0, the row is unused, and so the other flags
+	 * are useless and can be used by Octa to store data to help for
+	 * fast allocation of rows. */
+	flags_unexisting_t unexisting;
 };
 typedef union flags_t flags_t;
 void flags_col_givetoshader(GLuint* attrib_location_arr);
@@ -142,7 +152,9 @@ typedef struct ptis_t ptis_t;
 		ARGS_ARR_PTR(pti_t, __VA_ARGS__))
 void ptis_print(const ptis_t* ptis);
 
-/* Column. */
+/* Column.
+ * The pointed data buffer moves. To safely reference an instance of a
+ * property of an object, oi_t is to be used. */
 struct col_t
 {
 	pti_t pti;
@@ -152,7 +164,8 @@ struct col_t
 };
 typedef struct col_t col_t;
 
-/* Column table. */
+/* Column table.
+ * Once allocated, it never moves. */
 struct colt_t
 {
 	unsigned int col_count;

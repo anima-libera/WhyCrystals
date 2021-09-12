@@ -5,107 +5,19 @@
 #include "octa.h"
 #include "spw.h"
 #include "smata.h"
+#include "agteon.h"
 #include "utils.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h> /* strcmp, memset */
+#include <string.h>
 #include <math.h>
 #include <assert.h>
 
 #ifdef cplusplus__
 #error C compiler required
 #endif
-
-#define TAU 6.28318530717f
-
-/* TODO: Make this better. */
-void swap(unsigned int elem_size, void* arr,
-	unsigned int index_1, unsigned int index_2)
-{
-	char* elem_1 = &((char*)arr)[index_1 * elem_size];
-	char* elem_2 = &((char*)arr)[index_2 * elem_size];
-	char tmp[8];
-	memcpy(tmp, elem_1, elem_size);
-	memcpy(elem_1, elem_2, elem_size);
-	memcpy(elem_2, tmp, elem_size);
-}
-
-/* TODO: Make this better. */
-void shuffle(unsigned int elem_size, unsigned int len, void* arr, rg_t* rg)
-{
-	for (unsigned int i = 0; i < len-1; i++)
-	{
-		swap(elem_size, arr, i, rg_int(rg, i, len-1));
-	}
-}
-
-struct anim_step_t
-{
-	unsigned int sprite_id;
-	unsigned int next_step_start_time;
-};
-typedef struct anim_step_t anim_step_t;
-
-struct anim_t
-{
-	unsigned int step_count;
-	anim_step_t* step_arr;
-	unsigned int initial_inanim_time;
-	unsigned int initial_step_index;
-};
-typedef struct anim_t anim_t;
-
-struct anim_state_t
-{
-	const anim_t* anim;
-	unsigned int inanim_time;
-	unsigned int step_index;
-};
-typedef struct anim_state_t anim_state_t;
-
-void anim_start(anim_state_t* anim_state, const anim_t* anim,
-	unsigned int* target_sprite_id)
-{
-	*anim_state = (anim_state_t){
-		.anim = anim,
-		.inanim_time = anim->initial_inanim_time,
-		.step_index = anim->initial_step_index,
-	};
-	*target_sprite_id = anim->step_arr[anim->initial_step_index].sprite_id;
-}
-
-void anim_iterate(anim_state_t* anim_state, unsigned int* target_sprite_id)
-{
-	const anim_t* anim = anim_state->anim;
-	if (anim == NULL)
-	{
-		return;
-	}
-
-	const unsigned int previous_step_index = anim_state->step_index;
-	const unsigned int nsst =
-		anim->step_arr[anim_state->step_index].next_step_start_time;
-	//const unsigned int total_duration = 
-	//	anim->step_arr[anim->step_count-1].next_step_start_time;
-
-	anim_state->inanim_time++;
-	if (anim_state->inanim_time >= nsst)
-	{
-		anim_state->step_index++;
-		if (anim_state->step_index >= anim->step_count)
-		{
-			anim_state->step_index = 0;
-			anim_state->inanim_time = 0;
-		}
-	}
-
-	if (previous_step_index != anim_state->step_index)
-	{
-		*target_sprite_id = anim->step_arr[anim_state->step_index].sprite_id;
-	}
-}
 
 struct animal_terminal_type_t
 {
@@ -805,7 +717,7 @@ int main(int argc, char** argv)
 			}
 		}
 
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(0.03f, 0.0f, 0.1f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		spw_apply_on_colt(SPW_ID_POS, cursor_colt);

@@ -1,57 +1,74 @@
 
-- Add a flag on sprite ids or something to mirror the sprite along the y axis
+- Add a flag on sprite ids or something to mirror the sprite along the y axis.
 
-- Add a shader to display the waking path for debuging
-- Add a renderer that colors the pixels according to the z value
-- Add a way to emit smata's whole atlas texture
+- Add a shader to display the waking path for debuging.
+- Add a renderer that colors the pixels according to the z value.
+- Add a way to emit smata's whole atlas texture.
+
+- Make an octa-handled way to confortably iterate over objects,
+  like with a for loop or something.
 
 - Consider adding the possibility for shaders to do instancing,
   ie rendering a maybe complex model a bunch of times
-  (for multiple instance ids) and getting each instance's data via a buffer
+  (for multiple instance ids) and getting each instance's data via a buffer.
+
+- Add code generation abilities to the build system,
+  so that a point in C code can invoke a python script to make it generate
+  some C code that gets injected in an other point in C code.
+
+- Add compile-time shader preprocessing such as #include directives.
 
 - Add the concept of displayer, which can be a collection of shaders
   that can all be applied all at once on colts, or something like that,
-  but only once it is clear what this should do
+  but only once it is clear what this should do.
 
-- Make a command line based debugging interface
-- Document headers
-- Replace assert by a custom ASSERT macro with nice explainations
-- Add wrappers around malloc & co. to catch errors and leaks
-- Add a tracing system with signal handlers to print the trace stack
-- Fill the abreviation table
+- Use [u]int<N>_t types in things such as properties.
+
+- Make a command line based debugging interface.
+- Document headers.
+- Replace assert by a custom ASSERT macro with nice explainations.
+- Add wrappers around malloc & co. to catch errors and leaks.
+- Add a tracing system with signal handlers to print the trace stack.
+- Fill the abreviation table.
 
 - Make a practical (and optimized) way to store and apply shaders on single
-  objects (such as the player, or the cursor, etc.)
-- Maybe add maybe 0-sized properties maybe (aka tag components maybe) maybe
+  objects (such as the player, or the cursor, etc.).
+- Maybe add maybe 0-sized properties maybe (aka tag components maybe) maybe.
 
-- Add one chunk of a grid of tiles
-- Add types of tiles
-- Add water
-- Lower the level of water
-- Draw a dirt wall to fill the space between a water tile and the tile y+1
-- Make multiple chunks (do NOT try to optimize anything yet)
+- Add one chunk of a grid of tiles.
+- Add types of tiles.
+- Add water.
+- Lower the level of water.
+- Draw a dirt wall to fill the space between a water tile and the tile y+1.
+- Make multiple chunks (do NOT try to optimize anything yet).
 
-- Add bullets
-- Make the player shoot in a precise direction via the mouse
-- Make bullets kill animals
+- Add bullets.
+- Make the player shoot in a precise direction via the mouse.
+- Make bullets kill animals.
 
-- Add turrets
-- Make turrets shoot at animals
-- Add a core at the middle
-- Make some animals follow a path to the core
-- Make animals on the path want to break the now breakable core
+- Add turrets.
+- Make turrets shoot at animals.
+- Add a core at the middle.
+- Make some animals follow a path to the core.
+- Make animals on the path want to break the now breakable core.
 
-- Add particles
-- Add sounds
-- Add UI rendering
-- Add text rendering
-- Make the world view angle rotatable (like in the last maae attempt)
+- Make the world view angle rotatable (like in the last maae attempt).
 
-- Fix all the leaks
-- Use glBufferSubData instead of glBufferData when possible
-- Optimize smata
-- Optimize octa
-  - By making the finding of unused lines super fast (like does an allocator)
-  - By updating the OpenGL buffers only when necessary and on smaller slices
+- Add particles.
+- Add sounds.
+- Add UI rendering.
+- Add text rendering.
 
-- Expand the TODO list
+- Fix all the leaks.
+- Use glBufferSubData instead of glBufferData when possible.
+- Optimize smata.
+- Optimize octa:
+  - By making the finding of unused lines super fast (like does an allocator),
+    using the octa_number field of the flags_unexisting_t bit set to store
+    the index of the next hole and the size of the current hole and
+    maybe other stuff.
+  - By updating the OpenGL buffers only when necessary and on smaller slices.
+
+- Add a non-SDL backend (but keep the SDL2 one).
+
+- Expand the TODO list.

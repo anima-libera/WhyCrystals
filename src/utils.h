@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define TAU 6.28318530717f
+
 /* Used by DA_LENGTHEN. */
 unsigned int umax(unsigned int a, unsigned int b);
 
@@ -56,6 +58,12 @@ void* malloc_memcpy_2(
 	malloc_memcpy( \
 		sizeof(type_) * ARGS_COUNT(__VA_ARGS__), \
 		ARGS_ARR_PTR(type_, __VA_ARGS__))
+
+void swap(unsigned int elem_size, void* arr,
+	unsigned int index_1, unsigned int index_2);
+
+typedef struct rg_t rg_t;
+void shuffle(unsigned int elem_size, unsigned int len, void* arr, rg_t* rg);
 
 static inline float squaref(float x)
 {
