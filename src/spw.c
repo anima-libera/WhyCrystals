@@ -65,6 +65,18 @@ int init_spw_table(void)
 			ATTRIB_SET(PTI_POS, 1));
 	}
 	{
+		unsigned int spw_id = SPW_ID_SPRITE_RECT;
+		g_spw_table[spw_id].shprog_id = g_shprog_draw_sprite_rect;
+		SPW_DECLARE_UNIFORMS(spw_id,
+			UNIFORM(U_WINDOW_WH, 1));
+		SPW_DECLARE_BUFFERS(spw_id,
+			BUFFER(B_SMATA_SPRITE_RECTS, 0));
+		SPW_DECLARE_ATTRIB_SETS(spw_id,
+			ATTRIB_SET(PTI_FLAGS, 0),
+			ATTRIB_SET(PTI_POS, 1),
+			ATTRIB_SET(PTI_SPRITE, 2, 3));
+	}
+	{
 		unsigned int spw_id = SPW_ID_SPRITE;
 		g_spw_table[spw_id].shprog_id = g_shprog_draw_sprite;
 		SPW_DECLARE_UNIFORMS(spw_id,

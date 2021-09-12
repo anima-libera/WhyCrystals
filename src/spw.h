@@ -61,6 +61,7 @@ typedef struct spw_t spw_t;
 enum spw_id_t
 {
 	SPW_ID_POS,
+	SPW_ID_SPRITE_RECT,
 	SPW_ID_SPRITE,
 	SPW_COUNT
 };

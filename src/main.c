@@ -632,6 +632,7 @@ int main(int argc, char** argv)
 	/* h */
 
 	int display_positions = 0;
+	int display_sprite_rects = 0;
 
 	float zoom_factor = 120.0f;
 	//float scale_factor = 0.1f;
@@ -688,6 +689,7 @@ int main(int argc, char** argv)
 						break;
 						case SDLK_d:
 							display_positions = !display_positions;
+							display_sprite_rects = !display_sprite_rects;
 						break;
 						case SDLK_s:
 							for (unsigned int i = 0; i < 10; i++)
@@ -818,6 +820,14 @@ int main(int argc, char** argv)
 			spw_apply_on_colt(SPW_ID_POS, tree_colt);
 			spw_apply_on_colt(SPW_ID_POS, animal_colt);
 			spw_apply_on_colt(SPW_ID_POS, player_colt);
+		}
+
+		if (display_sprite_rects)
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+			spw_apply_on_colt(SPW_ID_SPRITE_RECT, tree_colt);
+			spw_apply_on_colt(SPW_ID_SPRITE_RECT, animal_colt);
+			spw_apply_on_colt(SPW_ID_SPRITE_RECT, player_colt);
 		}
 
 		SDL_GL_SwapWindow(g_window);
